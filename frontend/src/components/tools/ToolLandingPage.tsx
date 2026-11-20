@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { ToolMeta } from '../../types';
 import { ALL_TOOLS } from '../../data/tools';
-import { getToolSeoDetail } from '../../data/toolSeoContent';
+import { getLocalizedTool, getLocalizedToolSeo } from '../../data/localizedTools';
 import { getTranslations } from '../../i18n/translations';
 import { isRTL } from '../../i18n/languages';
+import { formatLocalizedPath } from '../../utils/url';
 import { Icon } from '../common/Icon';
 import { AdPlacement } from '../ads/AdPlacement';
 import { ToolWorkspace } from './ToolWorkspace';
@@ -13,7 +14,6 @@ import { AiIntelligenceWorkspace } from './AiIntelligenceWorkspace';
 import { PdfToMarkdownWorkspace } from './PdfToMarkdownWorkspace';
 import { ComparePdfWorkspace } from './ComparePdfWorkspace';
 import {
-  ChevronRight,
   ShieldCheck,
   CheckCircle2,
   AlertCircle,
@@ -37,7 +37,8 @@ export const ToolLandingPage: React.FC<ToolLandingPageProps> = ({
   onNavigate,
 }) => {
   const t = getTranslations(currentLang);
-  const seoDetail = getToolSeoDetail(tool.id);
+  const localizedTool = getLocalizedTool(tool, currentLang);
+  const localizedSeo = getLocalizedToolSeo(tool.id, currentLang);
   const rtl = isRTL(currentLang);
 
   // FAQ accordion state
@@ -45,13 +46,13 @@ export const ToolLandingPage: React.FC<ToolLandingPageProps> = ({
 
   // Internal link resolution for related tools
   const relatedTools = ALL_TOOLS.filter(
-    (t) => t.category === tool.category && t.id !== tool.id
-  ).slice(0, 3);
+    (item) => item.category === tool.category && item.id !== tool.id
+  )
+    .slice(0, 3)
+    .map((rt) => getLocalizedTool(rt, currentLang));
 
   // Helper to format localized path
-  const formatPath = (rawPath: string) => {
-    return currentLang === 'en' ? rawPath : `/${currentLang}${rawPath}`;
-  };
+  const formatPath = (rawPath: string) => formatLocalizedPath(rawPath, currentLang);
 
   const BreadcrumbArrow = rtl ? ArrowLeft : ArrowRight;
 
@@ -73,7 +74,7 @@ export const ToolLandingPage: React.FC<ToolLandingPageProps> = ({
           <BreadcrumbArrow className="w-3.5 h-3.5 text-slate-400" />
           <span className="capitalize text-slate-600">{tool.category.replace('-', ' ')}</span>
           <BreadcrumbArrow className="w-3.5 h-3.5 text-slate-400" />
-          <span className="text-slate-900 font-bold">{tool.name}</span>
+          <span className="text-slate-900 font-bold">{localizedTool.name}</span>
         </nav>
 
         {/* 2. DEDICATED TOOL HEADER BANNER */}
@@ -84,20 +85,20 @@ export const ToolLandingPage: React.FC<ToolLandingPageProps> = ({
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight">
-            {tool.name}
+            {localizedTool.name}
           </h1>
 
           <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
-            {tool.longDescription || tool.description}
+            {localizedTool.longDescription || localizedTool.description}
           </p>
         </header>
 
         {/* 3. FUNCTIONAL TOOL WORKSPACE INTERFACE */}
         <section aria-label="Tool Workspace" className="bg-white rounded-3xl border border-slate-200/90 shadow-soft overflow-hidden p-6 sm:p-8">
           {tool.id === 'sign-pdf' ? (
-            <PDFEditorWorkspace toolName="Sign PDF Document" />
+            <PDFEditorWorkspace toolName={localizedTool.name} />
           ) : tool.id === 'edit-pdf' ? (
-            <PDFEditorWorkspace toolName="Edit & Annotate PDF" />
+            <PDFEditorWorkspace toolName={localizedTool.name} />
           ) : tool.id === 'organize-pdf' ? (
             <OrganizePdfWorkspace />
           ) : tool.id === 'ai-summarizer' ? (
@@ -109,7 +110,7 @@ export const ToolLandingPage: React.FC<ToolLandingPageProps> = ({
           ) : tool.id === 'compare-pdf' ? (
             <ComparePdfWorkspace />
           ) : (
-            <ToolWorkspace tool={tool} onNavigate={onNavigate} />
+            <ToolWorkspace tool={localizedTool} onNavigate={onNavigate} />
           )}
         </section>
 
@@ -119,11 +120,11 @@ export const ToolLandingPage: React.FC<ToolLandingPageProps> = ({
         {/* 5. PRACTICAL HOW-TO-USE STEPS */}
         <section aria-labelledby="how-to-heading" className="bg-white rounded-3xl border border-slate-200 p-8 space-y-6 shadow-2xs">
           <h2 id="how-to-heading" className="text-2xl font-extrabold text-slate-900">
-            {t.howToUseTitle.replace('{tool}', tool.name)}
+            {t.howToUseTitle.replace('{tool}', localizedTool.name)}
           </h2>
 
           <ol className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {tool.howToSteps.map((step, idx) => (
+            {localizedTool.howToSteps.map((step, idx) => (
               <li
                 key={idx}
                 className="flex items-start gap-4 p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-brand-200 transition-colors"
@@ -149,7 +150,7 @@ export const ToolLandingPage: React.FC<ToolLandingPageProps> = ({
             </h3>
 
             <ul className="space-y-3.5">
-              {seoDetail.features.map((feature, idx) => (
+              {localizedSeo.features.map((feature, idx) => (
                 <li key={idx} className="flex items-start gap-3 text-sm text-slate-600">
                   <div className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 mt-0.5">
                     ✓
@@ -168,7 +169,7 @@ export const ToolLandingPage: React.FC<ToolLandingPageProps> = ({
             </h3>
 
             <ul className="space-y-3.5">
-              {seoDetail.useCases.map((useCase, idx) => (
+              {localizedSeo.useCases.map((useCase, idx) => (
                 <li key={idx} className="flex items-start gap-3 text-sm text-slate-600">
                   <div className="w-5 h-5 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center flex-shrink-0 mt-0.5">
                     •
@@ -206,7 +207,7 @@ export const ToolLandingPage: React.FC<ToolLandingPageProps> = ({
             </div>
 
             <ul className="space-y-2.5 pt-2">
-              {seoDetail.limitations.map((limit, idx) => (
+              {localizedSeo.limitations.map((limit, idx) => (
                 <li key={idx} className="text-xs text-slate-500 flex items-start gap-2">
                   <span className="text-amber-500 font-bold">•</span>
                   <span>{limit}</span>
@@ -228,7 +229,7 @@ export const ToolLandingPage: React.FC<ToolLandingPageProps> = ({
               </h3>
 
               <p className="text-sm text-slate-600 leading-relaxed pt-3">
-                {seoDetail.privacyNote}
+                {localizedSeo.privacyNote || t.privacyTitle}
               </p>
 
               <div className="mt-5 space-y-2 text-xs text-slate-500">
@@ -254,7 +255,7 @@ export const ToolLandingPage: React.FC<ToolLandingPageProps> = ({
         </div>
 
         {/* 8. TOOL-SPECIFIC FAQ ACCORDION */}
-        {seoDetail.faqs.length > 0 && (
+        {localizedSeo.faqs && localizedSeo.faqs.length > 0 && (
           <section aria-labelledby="faq-heading" className="bg-white rounded-3xl border border-slate-200 p-8 space-y-6 shadow-2xs">
             <h2 id="faq-heading" className="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
               <HelpCircle className="w-6 h-6 text-brand-600" />
@@ -262,7 +263,7 @@ export const ToolLandingPage: React.FC<ToolLandingPageProps> = ({
             </h2>
 
             <div className="space-y-3">
-              {seoDetail.faqs.map((faq, idx) => {
+              {localizedSeo.faqs.map((faq, idx) => {
                 const isOpen = openFaqIndex === idx;
                 return (
                   <div

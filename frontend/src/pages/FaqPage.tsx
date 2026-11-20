@@ -1,10 +1,18 @@
 import React, { useState } from 'react';
 import { HelpCircle, ChevronDown } from 'lucide-react';
-import { GLOBAL_FAQS } from '../data/faqs';
+import { getLocalizedGlobalFaqs } from '../data/faqs';
+import { getTranslations } from '../i18n/translations';
+import { parsePath } from '../utils/url';
 
-export const FaqPage: React.FC = () => {
+interface FaqPageProps {
+  currentLang?: string;
+}
+
+export const FaqPage: React.FC<FaqPageProps> = ({ currentLang }) => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
-  const fullFaqs = GLOBAL_FAQS;
+  const activeLang = currentLang || (typeof window !== 'undefined' ? parsePath(window.location.pathname).lang : 'en');
+  const t = getTranslations(activeLang);
+  const fullFaqs = getLocalizedGlobalFaqs(activeLang);
 
   return (
     <div className="py-16 bg-slate-50 min-h-screen">
@@ -12,13 +20,13 @@ export const FaqPage: React.FC = () => {
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-brand-700 text-xs font-bold">
             <HelpCircle className="w-3.5 h-3.5" />
-            <span>Help Center & Answers</span>
+            <span>{t.faqBadge}</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-            Frequently Asked Questions
+            {t.faqHeading}
           </h1>
           <p className="text-slate-600 text-sm max-w-md mx-auto">
-            Find answers to commonly asked questions about tools, file security, and subscription plans.
+            {t.faqSubtitle}
           </p>
         </div>
 

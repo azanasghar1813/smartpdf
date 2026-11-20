@@ -12,7 +12,7 @@ import { AdPlacement } from './components/ads/AdPlacement';
 import { SEOHead } from './components/common/SEOHead';
 import { ALL_TOOLS } from './data/tools';
 import { BLOG_POSTS, BlogPost } from './data/blogPosts';
-import { parsePath } from './utils/url';
+import { parsePath, formatLocalizedPath } from './utils/url';
 
 // Dynamic Code Splitting for Production Scalability & High Lighthouse Scores
 const ToolLandingPage = lazy(() => import('./components/tools/ToolLandingPage').then(m => ({ default: m.ToolLandingPage })));
@@ -88,7 +88,7 @@ const AppContent: React.FC = () => {
             <BlogPostPage
               post={currentBlogPost}
               onNavigate={navigateTo}
-              onBack={() => navigateTo('/blog')}
+              onBack={() => navigateTo(formatLocalizedPath('/blog', lang))}
             />
           ) : isBlogPost && !currentBlogPost ? (
             /* 404 for unknown blog slug */
@@ -96,24 +96,25 @@ const AppContent: React.FC = () => {
           ) : cleanPath === '/blog' ? (
             <BlogPage
               onNavigate={navigateTo}
-              onSelectPost={(post) => navigateTo(`/blog/${post.slug}`)}
+              onSelectPost={(post) => navigateTo(formatLocalizedPath(`/blog/${post.slug}`, lang))}
+              currentLang={lang}
             />
           ) : cleanPath === '/' ? (
             <div>
-              <Hero onSelectTool={navigateTo} />
-              <PopularTools onSelectTool={navigateTo} />
+              <Hero onSelectTool={navigateTo} currentLang={lang} />
+              <PopularTools onSelectTool={navigateTo} currentLang={lang} />
               <AdPlacement format="horizontal" />
-              <CategorySection onSelectTool={navigateTo} />
-              <HowItWorks />
-              <SecurityBanner />
-              <FAQSection />
+              <CategorySection onSelectTool={navigateTo} currentLang={lang} />
+              <HowItWorks currentLang={lang} />
+              <SecurityBanner currentLang={lang} />
+              <FAQSection currentLang={lang} />
             </div>
           ) : cleanPath === '/dashboard' ? (
             <DashboardPage onNavigate={navigateTo} />
           ) : cleanPath === '/admin' ? (
             <AdminPage />
           ) : cleanPath === '/pricing' ? (
-            <PricingPage onNavigate={navigateTo} />
+            <PricingPage onNavigate={navigateTo} currentLang={lang} />
           ) : cleanPath === '/privacy' ? (
             <PrivacyPage />
           ) : cleanPath === '/about' ? (
@@ -127,7 +128,7 @@ const AppContent: React.FC = () => {
           ) : cleanPath === '/cookies' ? (
             <CookiesPage />
           ) : cleanPath === '/faq' ? (
-            <FaqPage />
+            <FaqPage currentLang={lang} />
           ) : (
             /* REAL 404 PAGE FOR ANY UNMAPPED ROUTE */
             <NotFoundPage onNavigate={navigateTo} />
@@ -135,7 +136,7 @@ const AppContent: React.FC = () => {
         </Suspense>
       </main>
 
-      <Footer onNavigate={navigateTo} />
+      <Footer onNavigate={navigateTo} currentPath={currentPath} />
     </div>
   );
 };

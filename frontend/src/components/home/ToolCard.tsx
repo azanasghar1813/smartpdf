@@ -2,16 +2,22 @@ import React from 'react';
 import { ToolMeta } from '../../types';
 import { Icon } from '../common/Icon';
 import { Shield, Sparkles, ArrowRight } from 'lucide-react';
+import { getTranslations } from '../../i18n/translations';
+import { parsePath, formatLocalizedPath } from '../../utils/url';
 
 interface ToolCardProps {
   tool: ToolMeta;
   onSelect: (path: string) => void;
+  currentLang?: string;
 }
 
-export const ToolCard: React.FC<ToolCardProps> = ({ tool, onSelect }) => {
+export const ToolCard: React.FC<ToolCardProps> = ({ tool, onSelect, currentLang }) => {
+  const activeLang = currentLang || (typeof window !== 'undefined' ? parsePath(window.location.pathname).lang : 'en');
+  const t = getTranslations(activeLang);
+
   return (
     <div
-      onClick={() => onSelect(tool.path)}
+      onClick={() => onSelect(formatLocalizedPath(tool.path, activeLang))}
       className="group relative bg-white rounded-2xl border border-slate-200 p-5 shadow-xs hover:shadow-soft-lg hover:border-brand-300 transition-all duration-200 cursor-pointer flex flex-col justify-between"
     >
       <div>
@@ -24,7 +30,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, onSelect }) => {
           <div className="flex items-center gap-1.5">
             {tool.isClientSide && (
               <span
-                title="Runs 100% in your browser. Files never touch a server!"
+                title={t.clientPrivacyBadge}
                 className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full"
               >
                 <Shield className="w-3 h-3 text-emerald-600" />
@@ -33,7 +39,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, onSelect }) => {
             )}
             {tool.badge === 'Popular' && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 border border-rose-200">
-                Popular
+                HOT
               </span>
             )}
             {tool.badge === 'AI' && (
@@ -63,7 +69,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, onSelect }) => {
 
       {/* Card Action Link */}
       <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-400 group-hover:text-brand-600 transition-colors">
-        <span>Open tool</span>
+        <span>{t.openTool}</span>
         <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
       </div>
     </div>

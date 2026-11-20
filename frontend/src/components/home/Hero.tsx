@@ -1,35 +1,56 @@
 import React, { useState, useMemo } from 'react';
 import { ALL_TOOLS } from '../../data/tools';
+import { getLocalizedAllTools } from '../../data/localizedTools';
+import { getTranslations } from '../../i18n/translations';
+import { parsePath, formatLocalizedPath } from '../../utils/url';
 import { Icon } from '../common/Icon';
 import { Search, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
 import { ToolMeta } from '../../types';
 
 interface HeroProps {
   onSelectTool: (path: string) => void;
+  currentLang?: string;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onSelectTool }) => {
+export const Hero: React.FC<HeroProps> = ({ onSelectTool, currentLang }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const activeLang = currentLang || (typeof window !== 'undefined' ? parsePath(window.location.pathname).lang : 'en');
+  const t = getTranslations(activeLang);
+
+  const localizedTools = useMemo(() => getLocalizedAllTools(activeLang), [activeLang]);
 
   const filteredTools = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const query = searchQuery.toLowerCase();
-    return ALL_TOOLS.filter(
-      (t) =>
-        t.name.toLowerCase().includes(query) ||
-        t.description.toLowerCase().includes(query) ||
-        t.seoKeywords.some((k) => k.toLowerCase().includes(query))
-    ).slice(0, 6);
-  }, [searchQuery]);
+    return localizedTools
+      .filter(
+        (tool) =>
+          tool.name.toLowerCase().includes(query) ||
+          tool.description.toLowerCase().includes(query) ||
+          tool.seoKeywords.some((k) => k.toLowerCase().includes(query))
+      )
+      .slice(0, 6);
+  }, [localizedTools, searchQuery]);
 
-  const quickPills = [
-    { label: 'Merge PDF', path: '/merge-pdf' },
-    { label: 'Compress PDF', path: '/compress-pdf' },
-    { label: 'PDF to Word', path: '/pdf-to-word' },
-    { label: 'JPG to PDF', path: '/jpg-to-pdf' },
-    { label: 'Rotate PDF', path: '/rotate-pdf' },
-    { label: 'Protect PDF', path: '/protect-pdf' },
+  // Quick pills with localized names
+  const quickPillIds = [
+    'merge-pdf',
+    'compress-pdf',
+    'pdf-to-word',
+    'jpg-to-pdf',
+    'rotate-pdf',
+    'protect-pdf',
   ];
+
+  const quickPills = useMemo(() => {
+    return quickPillIds.map((id) => {
+      const tool = localizedTools.find((t) => t.id === id) || ALL_TOOLS.find((t) => t.id === id);
+      return {
+        label: tool ? tool.name : id,
+        path: formatLocalizedPath(tool ? tool.path : `/${id}`, activeLang),
+      };
+    });
+  }, [localizedTools, activeLang]);
 
   return (
     <section className="relative overflow-hidden pt-12 pb-16 md:pt-16 md:pb-20 bg-gradient-to-b from-white via-slate-50/50 to-slate-100/60 border-b border-slate-200">
@@ -40,21 +61,20 @@ export const Hero: React.FC<HeroProps> = ({ onSelectTool }) => {
         {/* Top Feature Pill */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-brand-700 text-xs font-bold tracking-wide shadow-sm animate-pulse">
           <Sparkles className="w-3.5 h-3.5 text-brand-600" />
-          <span>Every PDF Tool in One Fast, Secure Workspace</span>
+          <span>{t.heroBadge}</span>
         </div>
 
         {/* Main Title */}
         <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight sm:leading-none">
-          Every PDF Tool You Need. <br className="hidden sm:inline" />
+          {t.heroTitle} <br className="hidden sm:inline" />
           <span className="bg-gradient-to-r from-brand-600 via-rose-500 to-amber-500 bg-clip-text text-transparent">
-            All in One Place.
+            {t.heroTitleGradient}
           </span>
         </h1>
 
         {/* Subtitle */}
         <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-600 leading-relaxed">
-          Merge, split, compress, convert, rotate, unlock, and edit PDF files online 100% free. 
-          Enjoy lightning-fast in-browser processing with zero file retention.
+          {t.heroSubtitle}
         </p>
 
         {/* Search Bar Container */}
@@ -65,7 +85,7 @@ export const Hero: React.FC<HeroProps> = ({ onSelectTool }) => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search PDF tools (e.g. Merge, Compress, PDF to Word, Sign, Protect)..."
+              placeholder={t.searchPlaceholder}
               className="w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-slate-200 bg-white shadow-soft focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 text-slate-800 placeholder-slate-400 text-base transition-all"
             />
             {searchQuery && (
@@ -73,7 +93,7 @@ export const Hero: React.FC<HeroProps> = ({ onSelectTool }) => {
                 onClick={() => setSearchQuery('')}
                 className="absolute right-4 text-xs font-semibold px-2 py-1 rounded-md bg-slate-100 text-slate-500 hover:bg-slate-200"
               >
-                Clear
+                {t.clear}
               </button>
             )}
           </div>
@@ -85,7 +105,7 @@ export const Hero: React.FC<HeroProps> = ({ onSelectTool }) => {
                 <button
                   key={tool.id}
                   onClick={() => {
-                    onSelectTool(tool.path);
+                    onSelectTool(formatLocalizedPath(tool.path, activeLang));
                     setSearchQuery('');
                   }}
                   className="w-full flex items-center justify-between p-3.5 hover:bg-rose-50/70 transition-colors group"
@@ -112,7 +132,7 @@ export const Hero: React.FC<HeroProps> = ({ onSelectTool }) => {
           {/* Quick Action Pills */}
           <div className="flex flex-wrap items-center justify-center gap-2 pt-4">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mr-1">
-              Popular:
+              {t.popularTools}:
             </span>
             {quickPills.map((pill) => (
               <button
@@ -130,15 +150,11 @@ export const Hero: React.FC<HeroProps> = ({ onSelectTool }) => {
         <div className="pt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-500">
           <span className="flex items-center gap-1.5 font-medium">
             <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            Zero-Retention Privacy Guarantee
+            {t.clientPrivacyBadge}
           </span>
           <span className="flex items-center gap-1.5 font-medium">
             <Sparkles className="w-4 h-4 text-brand-500" />
-            100% Free Essential Tools
-          </span>
-          <span className="flex items-center gap-1.5 font-medium">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-ping" />
-            Edge In-Browser Processing Available
+            {t.freeLimitNotice}
           </span>
         </div>
       </div>

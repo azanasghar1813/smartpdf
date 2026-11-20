@@ -1,24 +1,33 @@
 import React from 'react';
 import { UploadCloud, Sliders, DownloadCloud } from 'lucide-react';
+import { getTranslations } from '../../i18n/translations';
+import { parsePath } from '../../utils/url';
 
-export const HowItWorks: React.FC = () => {
+interface HowItWorksProps {
+  currentLang?: string;
+}
+
+export const HowItWorks: React.FC<HowItWorksProps> = ({ currentLang }) => {
+  const activeLang = currentLang || (typeof window !== 'undefined' ? parsePath(window.location.pathname).lang : 'en');
+  const t = getTranslations(activeLang);
+
   const steps = [
     {
       step: '01',
-      title: 'Select or Drop Files',
-      description: 'Upload your PDF documents directly from your device, phone, or drag-and-drop into our secure workspace.',
+      title: t.step1Title,
+      description: t.step1Desc,
       icon: UploadCloud,
     },
     {
       step: '02',
-      title: 'Customize & Process',
-      description: 'Reorder pages, select compression levels, adjust watermark settings, or configure conversion options with real-time feedback.',
+      title: t.step2Title,
+      description: t.step2Desc,
       icon: Sliders,
     },
     {
       step: '03',
-      title: 'Download & Done',
-      description: 'Download your finalized PDF instantaneously. Core tools process right in your browser without any waiting queues.',
+      title: t.step3Title,
+      description: t.step3Desc,
       icon: DownloadCloud,
     },
   ];
@@ -28,18 +37,18 @@ export const HowItWorks: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-14 space-y-2">
           <span className="text-xs font-bold text-brand-600 uppercase tracking-wider">
-            Simple 3-Step Process
+            {t.howItWorksBadge}
           </span>
           <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-            How SimplePDF Works
+            {t.howItWorksHeading}
           </h2>
           <p className="text-sm text-slate-500">
-            No complex software installations or steep learning curves. Complete your document workflows in seconds.
+            {t.howItWorksSubtitle}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-          {steps.map((s, index) => {
+          {steps.map((s) => {
             const IconComponent = s.icon;
             return (
               <div
@@ -59,16 +68,10 @@ export const HowItWorks: React.FC = () => {
                   <h3 className="text-xl font-bold text-slate-900 mb-2">
                     {s.title}
                   </h3>
-                  <p className="text-sm text-slate-600 leading-relaxed">
+                  <p className="text-sm text-slate-500 leading-relaxed">
                     {s.description}
                   </p>
                 </div>
-
-                {index < 2 && (
-                  <div className="hidden md:block absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 flex items-center justify-center text-xs font-bold shadow-xs">
-                    →
-                  </div>
-                )}
               </div>
             );
           })}

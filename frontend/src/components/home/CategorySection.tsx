@@ -1,29 +1,38 @@
-import React, { useState } from 'react';
-import { ALL_TOOLS, CATEGORIES_CONFIG } from '../../data/tools';
+import React, { useState, useMemo } from 'react';
 import { ToolCard } from './ToolCard';
 import { ToolCategory } from '../../types';
+import { getLocalizedAllTools, getLocalizedCategories } from '../../data/localizedTools';
+import { getTranslations } from '../../i18n/translations';
+import { parsePath } from '../../utils/url';
 
 interface CategorySectionProps {
   onSelectTool: (path: string) => void;
+  currentLang?: string;
 }
 
-export const CategorySection: React.FC<CategorySectionProps> = ({ onSelectTool }) => {
+export const CategorySection: React.FC<CategorySectionProps> = ({ onSelectTool, currentLang }) => {
+  const activeLang = currentLang || (typeof window !== 'undefined' ? parsePath(window.location.pathname).lang : 'en');
+  const t = getTranslations(activeLang);
+
+  const localizedCategories = useMemo(() => getLocalizedCategories(activeLang), [activeLang]);
+  const localizedTools = useMemo(() => getLocalizedAllTools(activeLang), [activeLang]);
+
   const [activeCategory, setActiveCategory] = useState<ToolCategory | 'all'>('all');
 
   const displayedCategories =
     activeCategory === 'all'
-      ? CATEGORIES_CONFIG
-      : CATEGORIES_CONFIG.filter((c) => c.id === activeCategory);
+      ? localizedCategories
+      : localizedCategories.filter((c) => c.id === activeCategory);
 
   return (
     <section className="py-14 bg-slate-50 border-t border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         <div className="text-center space-y-3 max-w-3xl mx-auto">
           <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-            Explore All 30+ PDF Tools
+            {t.exploreAllTools}
           </h2>
           <p className="text-slate-600 text-sm sm:text-base">
-            From essential page merging and compression to OCR, electronic signatures, and AI document intelligence.
+            {t.exploreSubtitle}
           </p>
 
           {/* Filter Pills */}
@@ -36,9 +45,9 @@ export const CategorySection: React.FC<CategorySectionProps> = ({ onSelectTool }
                   : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
               }`}
             >
-              All Categories
+              {t.allCategories}
             </button>
-            {CATEGORIES_CONFIG.map((cat) => (
+            {localizedCategories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
@@ -57,7 +66,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({ onSelectTool }
         {/* Categories and Cards */}
         <div className="space-y-12">
           {displayedCategories.map((cat) => {
-            const toolsInCat = ALL_TOOLS.filter((t) => t.category === cat.id);
+            const toolsInCat = localizedTools.filter((t) => t.category === cat.id);
             if (toolsInCat.length === 0) return null;
 
             return (
@@ -76,7 +85,12 @@ export const CategorySection: React.FC<CategorySectionProps> = ({ onSelectTool }
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                   {toolsInCat.map((tool) => (
-                    <ToolCard key={tool.id} tool={tool} onSelect={onSelectTool} />
+                    <ToolCard
+                      key={tool.id}
+                      tool={tool}
+                      onSelect={onSelectTool}
+                      currentLang={activeLang}
+                    />
                   ))}
                 </div>
               </div>

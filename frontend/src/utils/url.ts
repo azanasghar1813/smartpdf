@@ -59,6 +59,24 @@ export function getEquivalentPath(currentPath: string, targetLang: string): stri
 }
 
 /**
+ * Standardized helper to format any relative path with the active language prefix.
+ * Guarantees that internal links preserve the active language across the entire application.
+ * Examples:
+ *   formatLocalizedPath('/merge-pdf', 'ur')   -> '/ur/merge-pdf'
+ *   formatLocalizedPath('/pricing', 'ur')     -> '/ur/pricing'
+ *   formatLocalizedPath('/', 'ur')           -> '/ur'
+ *   formatLocalizedPath('/merge-pdf', 'en')   -> '/merge-pdf'
+ *   formatLocalizedPath('/', 'en')           -> '/'
+ */
+export function formatLocalizedPath(rawPath: string, lang?: string): string {
+  const normalized = rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
+  if (!lang || lang === DEFAULT_LANGUAGE) {
+    return normalized;
+  }
+  return normalized === '/' ? `/${lang}` : `/${lang}${normalized}`;
+}
+
+/**
  * Constructs an absolute canonical URL using the centralized SITE_URL configuration.
  */
 export function getCanonicalUrl(pathname: string): string {

@@ -1,7 +1,16 @@
 import React from 'react';
 import { ShieldCheck, Lock, Trash2, Cpu } from 'lucide-react';
+import { getTranslations } from '../../i18n/translations';
+import { parsePath } from '../../utils/url';
 
-export const SecurityBanner: React.FC = () => {
+interface SecurityBannerProps {
+  currentLang?: string;
+}
+
+export const SecurityBanner: React.FC<SecurityBannerProps> = ({ currentLang }) => {
+  const activeLang = currentLang || (typeof window !== 'undefined' ? parsePath(window.location.pathname).lang : 'en');
+  const t = getTranslations(activeLang);
+
   const securityPillars = [
     {
       title: 'In-Browser Privacy First',
@@ -34,13 +43,13 @@ export const SecurityBanner: React.FC = () => {
         <div className="max-w-3xl mx-auto text-center space-y-3 mb-14">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold tracking-wide">
             <ShieldCheck className="w-4 h-4" />
-            <span>Strict Privacy Standards</span>
+            <span>{t.securityBadge}</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            Security & Document Privacy Are Not Optional
+            {t.securityHeading}
           </h2>
           <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
-            Whether you are handling confidential legal contracts, academic transcripts, or personal IDs, SimplePDF is engineered with uncompromising protection.
+            {t.securitySubtitle}
           </p>
         </div>
 

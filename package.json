@@ -24,9 +24,9 @@
     "test:security": "node tests/security.test.js",
     "test:reliability": "node tests/reliability.test.js",
     "test:load": "node tests/load.test.js",
-    "test:i18n": "node tests/i18n.test.js",
+    "test:i18n": "npx tsx tests/i18n.test.js",
     "test:audit8": "npx tsx tests/audit-8-fixes.test.js",
-    "test": "node tests/functional.test.js && node tests/queue.test.js && node tests/security.test.js && node tests/reliability.test.js && node tests/load.test.js && node tests/i18n.test.js && npx tsx tests/audit-8-fixes.test.js"
+    "test": "node tests/functional.test.js && node tests/queue.test.js && node tests/security.test.js && node tests/reliability.test.js && node tests/load.test.js && npx tsx tests/i18n.test.js && npx tsx tests/audit-8-fixes.test.js"
   },
   "keywords": [
     "pdf",

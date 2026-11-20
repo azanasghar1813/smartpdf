@@ -1,22 +1,30 @@
 import React from 'react';
-import { Check, Sparkles, Shield, Building2 } from 'lucide-react';
+import { Check, Sparkles, Shield } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { getTranslations } from '../i18n/translations';
+import { parsePath, formatLocalizedPath } from '../utils/url';
 
 interface PricingPageProps {
   onNavigate: (path: string) => void;
+  currentLang?: string;
 }
 
-export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
+export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate, currentLang }) => {
   const { upgradeToPro } = useAuth();
+  const activeLang = currentLang || (typeof window !== 'undefined' ? parsePath(window.location.pathname).lang : 'en');
+  const t = getTranslations(activeLang);
+
+  const nav = (p: string) => onNavigate(formatLocalizedPath(p, activeLang));
+
   const plans = [
     {
-      name: 'Free / Guest',
-      price: '$0',
-      period: 'Forever free',
-      description: 'Everything you need for everyday individual document tasks with in-browser privacy.',
-      badge: 'Default',
+      name: t.freePlanTitle,
+      price: t.freePlanPrice,
+      period: t.freePlanPeriod,
+      description: t.freePlanDesc,
+      badge: 'Free',
       badgeColor: 'bg-slate-100 text-slate-700',
-      cta: 'Start Free Now',
+      cta: t.freePlanCta,
       ctaStyle: 'bg-slate-900 hover:bg-slate-800 text-white',
       features: [
         'All essential PDF tools (Merge, Split, Rotate, etc.)',
@@ -30,14 +38,14 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
       notIncluded: ['Unlimited batch conversions', 'Priority dedicated OCR servers', 'Ad-free experience'],
     },
     {
-      name: 'Premium Pro',
-      price: '$4.99',
-      period: 'per month',
-      description: 'For professionals, freelancers, and students requiring high-volume productivity & AI.',
+      name: t.proPlanTitle,
+      price: t.proPlanPrice,
+      period: t.proPlanPeriod,
+      description: t.proPlanDesc,
       badge: 'Most Popular',
       badgeColor: 'bg-brand-600 text-white shadow-sm',
       popular: true,
-      cta: 'Upgrade to Pro',
+      cta: t.proPlanCta,
       ctaStyle: 'bg-brand-600 hover:bg-brand-700 text-white shadow-soft-lg shadow-brand-500/30',
       features: [
         'Everything in Free Plan',
@@ -52,13 +60,13 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
       notIncluded: [],
     },
     {
-      name: 'Business & Teams',
-      price: 'Custom',
-      period: 'per team / month',
-      description: 'Centralized document infrastructure for enterprises, law firms, and institutions.',
+      name: t.enterprisePlanTitle,
+      price: t.enterprisePlanPrice,
+      period: t.enterprisePlanPeriod,
+      description: t.enterprisePlanDesc,
       badge: 'Enterprise',
       badgeColor: 'bg-indigo-100 text-indigo-700',
-      cta: 'Contact Sales',
+      cta: t.enterprisePlanCta,
       ctaStyle: 'bg-white hover:bg-slate-50 text-slate-900 border-2 border-slate-200',
       features: [
         'Everything in Premium Pro',
@@ -80,21 +88,21 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-brand-700 text-xs font-bold">
             <Sparkles className="w-3.5 h-3.5 text-brand-600" />
-            <span>Transparent, Scalable Pricing</span>
+            <span>{t.pricingBadge}</span>
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
-            Simple Plans for Every PDF Need
+            {t.pricingHeading}
           </h1>
           <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
-            Start completely free without creating an account, or upgrade to Premium for heavy batch workloads, OCR, and AI intelligence.
+            {t.pricingSubtitle}
           </p>
         </div>
 
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
-          {plans.map((p) => (
+          {plans.map((p, idx) => (
             <div
-              key={p.name}
+              key={idx}
               className={`relative bg-white rounded-3xl p-8 border flex flex-col justify-between transition-all duration-200 ${
                 p.popular
                   ? 'border-2 border-brand-500 shadow-soft-lg scale-[1.02]'
@@ -132,7 +140,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
                 {/* Features List */}
                 <div className="mt-8 space-y-3 pt-6 border-t border-slate-100">
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                    What's Included:
+                    Features:
                   </span>
                   <ul className="space-y-2.5 text-xs sm:text-sm text-slate-600">
                     {p.features.map((feat) => (
@@ -148,14 +156,14 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
               <div className="mt-8 pt-6 border-t border-slate-100">
                 <button
                   onClick={() => {
-                    if (p.name === 'Premium Pro') {
+                    if (idx === 1) {
                       upgradeToPro();
                       alert('🎉 Congratulations! Your account has been upgraded to Premium Pro ($4.99/mo). Unlimited quota and cloud OCR/AI features are now unlocked!');
-                      onNavigate('/dashboard');
-                    } else if (p.name === 'Business & Teams') {
-                      onNavigate('/contact');
+                      nav('/dashboard');
+                    } else if (idx === 2) {
+                      nav('/contact');
                     } else {
-                      onNavigate('/');
+                      nav('/');
                     }
                   }}
                   className={`w-full py-3.5 rounded-xl font-bold text-sm text-center transition-all ${p.ctaStyle}`}

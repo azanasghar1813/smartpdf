@@ -73,6 +73,15 @@ function getCanonicalUrl(cleanPath, lang) {
   return `${SITE_URL}${cleanPath === '/' ? `/${lang}` : `/${lang}${cleanPath}`}`;
 }
 
+// Helper: emulate formatLocalizedPath
+function formatLocalizedPath(rawPath, lang) {
+  const normalized = rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
+  if (!lang || lang === DEFAULT_LANGUAGE) {
+    return normalized;
+  }
+  return normalized === '/' ? `/${lang}` : `/${lang}${normalized}`;
+}
+
 // Helper: emulate hreflang generation
 function getHreflangLinks(cleanPath) {
   const published = getPublishedLanguages();
@@ -251,6 +260,14 @@ async function runAll() {
     assert.ok(arHtml.includes('<link rel="canonical" href="https://simplepdf.me/ar/merge-pdf" />'), 'Arabic canonical missing');
     assert.ok(arHtml.includes('خصوصية تامة 100% داخل المتصفح'), 'Arabic UI translation badge missing');
 
+    // Urdu Merge PDF (RTL)
+    const urMergePath = path.join(DIST_DIR, 'ur', 'merge-pdf', 'index.html');
+    assert.ok(fs.existsSync(urMergePath), 'dist/ur/merge-pdf/index.html missing');
+    const urMergeHtml = fs.readFileSync(urMergePath, 'utf-8');
+    assert.ok(urMergeHtml.includes('<html lang="ur" dir="rtl">'), 'Urdu page must have lang="ur" dir="rtl"');
+    assert.ok(urMergeHtml.includes('PDF ضم کریں'), 'Urdu tool name must be translated to PDF ضم کریں');
+    assert.ok(urMergeHtml.includes('SimplePDF کے ساتھ PDF ضم کریں استعمال کرنے کا طریقہ'), 'Urdu HowTo heading missing');
+
     // Urdu Compress PDF (RTL)
     const urCompressPath = path.join(DIST_DIR, 'ur', 'compress-pdf', 'index.html');
     assert.ok(fs.existsSync(urCompressPath), 'dist/ur/compress-pdf/index.html missing');
@@ -258,6 +275,66 @@ async function runAll() {
     assert.ok(urHtml.includes('<html lang="ur" dir="rtl">'), 'Urdu page must have lang="ur" dir="rtl"');
     assert.ok(urHtml.includes('<link rel="canonical" href="https://simplepdf.me/ur/compress-pdf" />'), 'Urdu canonical missing');
     assert.ok(urHtml.includes('100% براؤزر پرائیویسی'), 'Urdu UI translation badge missing');
+  });
+
+  // Test 9: LanguageSwitcher User Workflow Simulation (/merge-pdf -> ur -> /ur/merge-pdf -> stay in /ur/)
+  await runTest('Test 9: Full LanguageSwitcher & internal link prefix preservation workflow', () => {
+    // 1. Initial user on English tool page: /merge-pdf
+    const currentToolUrl = '/merge-pdf';
+    
+    // 2. User clicks Urdu in LanguageSwitcher: getEquivalentPath preserves page and adds /ur
+    const switchedToUrdu = getEquivalentPath(currentToolUrl, 'ur');
+    assert.strictEqual(switchedToUrdu, '/ur/merge-pdf', 'Switching to Urdu must yield /ur/merge-pdf');
+
+    // 3. User clicks Navbar Pricing link: formatLocalizedPath keeps /ur/
+    const pricingInUrdu = formatLocalizedPath('/pricing', 'ur');
+    assert.strictEqual(pricingInUrdu, '/ur/pricing', 'Navigating to Pricing from Urdu must yield /ur/pricing');
+
+    // 4. User clicks Navbar Blog link: formatLocalizedPath keeps /ur/
+    const blogInUrdu = formatLocalizedPath('/blog', 'ur');
+    assert.strictEqual(blogInUrdu, '/ur/blog', 'Navigating to Blog from Urdu must yield /ur/blog');
+
+    // 5. User clicks Navbar Logo: formatLocalizedPath keeps /ur/
+    const homeInUrdu = formatLocalizedPath('/', 'ur');
+    assert.strictEqual(homeInUrdu, '/ur', 'Navigating to Logo from Urdu must yield /ur');
+
+    // 6. User clicks Merge PDF from Navbar: formatLocalizedPath keeps /ur/
+    const toolAgainInUrdu = formatLocalizedPath('/merge-pdf', 'ur');
+    assert.strictEqual(toolAgainInUrdu, '/ur/merge-pdf', 'Navigating back to tool from Urdu must yield /ur/merge-pdf');
+
+    // 7. Switching back to English from /ur/merge-pdf removes prefix cleanly
+    const switchedBackToEn = getEquivalentPath('/ur/merge-pdf', 'en');
+    assert.strictEqual(switchedBackToEn, '/merge-pdf', 'Switching back to English must remove /ur prefix');
+  });
+
+  // Test 10: Curated Localized Tool Content Integrity
+  await runTest('Test 10: Localized tool content integrity (Urdu translation verification)', () => {
+    const { getLocalizedTool, getLocalizedAllTools } = require('../frontend/src/data/localizedTools.ts');
+    const { ALL_TOOLS } = require('../frontend/src/data/tools.ts');
+
+    const mergeTool = ALL_TOOLS.find((t) => t.id === 'merge-pdf');
+    assert.ok(mergeTool, 'merge-pdf tool must exist in ALL_TOOLS');
+
+    const urMergeTool = getLocalizedTool(mergeTool, 'ur');
+    assert.strictEqual(urMergeTool.name, 'PDF ضم کریں', 'Urdu tool name mismatch');
+    assert.ok(urMergeTool.howToSteps.length > 0, 'Urdu howToSteps must be present');
+    assert.ok(urMergeTool.howToSteps[0].includes('اپنی متعدد PDF فائلیں منتخب کریں'), 'Urdu howToStep 1 mismatch');
+
+    const splitTool = ALL_TOOLS.find((t) => t.id === 'split-pdf');
+    const urSplitTool = getLocalizedTool(splitTool, 'ur');
+    assert.strictEqual(urSplitTool.name, 'PDF تقسیم کریں', 'Urdu split tool name mismatch');
+
+    const compressTool = ALL_TOOLS.find((t) => t.id === 'compress-pdf');
+    const urCompressTool = getLocalizedTool(compressTool, 'ur');
+    assert.strictEqual(urCompressTool.name, 'PDF کمپریس کریں', 'Urdu compress tool name mismatch');
+
+    const signTool = ALL_TOOLS.find((t) => t.id === 'sign-pdf');
+    const urSignTool = getLocalizedTool(signTool, 'ur');
+    assert.strictEqual(urSignTool.name, 'PDF پر دستخط کریں', 'Urdu sign tool name mismatch');
+
+    // Verify all tools localized catalog is populated
+    const urAllTools = getLocalizedAllTools('ur');
+    assert.strictEqual(urAllTools.length, ALL_TOOLS.length, 'All tools must be returned for Urdu');
   });
 
   console.log(`\nI18n Test Results: ${passed} Passed, ${failed} Failed.\n`);

@@ -1,5 +1,8 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { ALL_TOOLS, CATEGORIES_CONFIG } from '../../data/tools';
+import { getLocalizedAllTools, getLocalizedCategories, getLocalizedTool } from '../../data/localizedTools';
+import { getTranslations } from '../../i18n/translations';
+import { parsePath, formatLocalizedPath } from '../../utils/url';
 import { Icon } from '../common/Icon';
 import { useAuth } from '../../context/AuthContext';
 import { AuthModal } from '../auth/AuthModal';
@@ -33,6 +36,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
+  // URL & Language awareness
+  const { lang, cleanPath } = parsePath(currentPath);
+  const t = getTranslations(lang);
+
+  // Localized tools & categories
+  const localizedTools = useMemo(() => getLocalizedAllTools(lang), [lang]);
+  const localizedCategories = useMemo(() => getLocalizedCategories(lang), [lang]);
+
+  // Language-aware navigation helper
+  const nav = (rawPath: string) => {
+    onNavigate(formatLocalizedPath(rawPath, lang));
+  };
+
   // Mobile drawer filter & search state
   const [mobileSearch, setMobileSearch] = useState('');
   const [selectedMobileCategory, setSelectedMobileCategory] = useState<string>('all');
@@ -54,7 +70,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
 
   // Filter tools for mobile drawer
   const mobileFilteredTools = useMemo(() => {
-    let list = ALL_TOOLS;
+    let list = localizedTools;
     if (selectedMobileCategory !== 'all') {
       list = list.filter((t) => t.category === selectedMobileCategory);
     }
@@ -68,17 +84,22 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
       );
     }
     return list;
-  }, [mobileSearch, selectedMobileCategory]);
+  }, [localizedTools, mobileSearch, selectedMobileCategory]);
+
+  // Find quick tool definitions with localized names
+  const quickMerge = localizedTools.find((t) => t.id === 'merge-pdf') || ALL_TOOLS[0];
+  const quickSplit = localizedTools.find((t) => t.id === 'split-pdf') || ALL_TOOLS[1];
+  const quickCompress = localizedTools.find((t) => t.id === 'compress-pdf') || ALL_TOOLS[5];
+  const quickSign = localizedTools.find((t) => t.id === 'sign-pdf') || ALL_TOOLS[26];
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 transition-all">
-      {/* Relative positioning context for mega menu */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div
             onClick={() => {
-              onNavigate('/');
+              nav('/');
               setToolsDropdownOpen(false);
             }}
             className="flex items-center gap-2.5 cursor-pointer group select-none"
@@ -101,12 +122,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
               onClick={() => setToolsDropdownOpen(!toolsDropdownOpen)}
               onMouseEnter={() => setToolsDropdownOpen(true)}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl font-bold text-sm transition-colors ${
-                toolsDropdownOpen || (currentPath.startsWith('/') && currentPath !== '/' && currentPath !== '/pricing' && currentPath !== '/blog')
+                toolsDropdownOpen || (cleanPath.startsWith('/') && cleanPath !== '/' && cleanPath !== '/pricing' && cleanPath !== '/blog')
                   ? 'text-brand-600 bg-brand-50'
                   : 'text-slate-700 hover:text-brand-600 hover:bg-slate-100'
               }`}
             >
-              <span>All PDF Tools</span>
+              <span>{t.allPdfTools}</span>
               <ChevronDown
                 className={`w-4 h-4 transition-transform duration-200 ${
                   toolsDropdownOpen ? 'rotate-180 text-brand-600' : 'text-slate-400'
@@ -117,82 +138,82 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
             {/* Direct Quick Tools */}
             <button
               onClick={() => {
-                onNavigate('/merge-pdf');
+                nav('/merge-pdf');
                 setToolsDropdownOpen(false);
               }}
               className={`px-3 py-2 rounded-xl text-sm font-bold transition-colors ${
-                currentPath === '/merge-pdf'
+                cleanPath === '/merge-pdf'
                   ? 'text-brand-600 bg-brand-50'
                   : 'text-slate-700 hover:text-brand-600 hover:bg-slate-100'
               }`}
             >
-              Merge PDF
+              {quickMerge.name || t.mergePdf}
             </button>
             <button
               onClick={() => {
-                onNavigate('/split-pdf');
+                nav('/split-pdf');
                 setToolsDropdownOpen(false);
               }}
               className={`px-3 py-2 rounded-xl text-sm font-bold transition-colors ${
-                currentPath === '/split-pdf'
+                cleanPath === '/split-pdf'
                   ? 'text-brand-600 bg-brand-50'
                   : 'text-slate-700 hover:text-brand-600 hover:bg-slate-100'
               }`}
             >
-              Split PDF
+              {quickSplit.name || t.splitPdf}
             </button>
             <button
               onClick={() => {
-                onNavigate('/compress-pdf');
+                nav('/compress-pdf');
                 setToolsDropdownOpen(false);
               }}
               className={`px-3 py-2 rounded-xl text-sm font-bold transition-colors ${
-                currentPath === '/compress-pdf'
+                cleanPath === '/compress-pdf'
                   ? 'text-brand-600 bg-brand-50'
                   : 'text-slate-700 hover:text-brand-600 hover:bg-slate-100'
               }`}
             >
-              Compress PDF
+              {quickCompress.name || t.compressPdf}
             </button>
             <button
               onClick={() => {
-                onNavigate('/sign-pdf');
+                nav('/sign-pdf');
                 setToolsDropdownOpen(false);
               }}
               className={`px-3 py-2 rounded-xl text-sm font-bold flex items-center gap-1.5 transition-colors ${
-                currentPath === '/sign-pdf'
+                cleanPath === '/sign-pdf'
                   ? 'text-brand-600 bg-brand-50'
                   : 'text-slate-700 hover:text-brand-600 hover:bg-slate-100'
               }`}
             >
               <PenTool className="w-3.5 h-3.5 text-brand-600" />
-              <span>Sign PDF</span>
+              <span>{quickSign.name || t.signPdf}</span>
             </button>
             <button
               onClick={() => {
-                onNavigate('/pricing');
+                nav('/pricing');
                 setToolsDropdownOpen(false);
               }}
               className={`px-3 py-2 rounded-xl text-sm font-bold transition-colors ${
-                currentPath === '/pricing'
+                cleanPath === '/pricing'
                   ? 'text-brand-600 bg-brand-50'
                   : 'text-slate-700 hover:text-brand-600 hover:bg-slate-100'
               }`}
             >
-              Pricing
+              {t.pricing}
             </button>
             <button
               onClick={() => {
-                onNavigate('/blog');
+                nav('/blog');
                 setToolsDropdownOpen(false);
               }}
               className={`px-3 py-2 rounded-xl text-sm font-bold transition-colors ${
-                currentPath === '/blog'
+                cleanPath === '/blog'
                   ? 'text-brand-600 bg-brand-50'
                   : 'text-slate-700 hover:text-brand-600 hover:bg-slate-100'
               }`}
             >
-              Blog
+              {t.blog}
             </button>
           </nav>
 
@@ -203,38 +224,38 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
                 {user.role === 'admin' && (
                   <button
                     onClick={() => {
-                      onNavigate('/admin');
+                      nav('/admin');
                       setToolsDropdownOpen(false);
                     }}
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                      currentPath === '/admin'
+                      cleanPath === '/admin'
                         ? 'bg-amber-400 text-slate-900 shadow-sm'
                         : 'bg-slate-900 text-amber-400 hover:bg-slate-800'
                     }`}
                   >
                     <ShieldAlert className="w-3.5 h-3.5" />
-                    <span>Admin</span>
+                    <span>{t.admin}</span>
                   </button>
                 )}
 
                 <button
                   onClick={() => {
-                    onNavigate('/dashboard');
+                    nav('/dashboard');
                     setToolsDropdownOpen(false);
                   }}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                    currentPath === '/dashboard'
+                    cleanPath === '/dashboard'
                       ? 'border-brand-500 bg-rose-50 text-brand-600'
                       : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
                   }`}
                 >
                   <LayoutDashboard className="w-3.5 h-3.5 text-brand-600" />
-                  <span>Dashboard</span>
+                  <span>{t.dashboard}</span>
                 </button>
 
                 <button
                   onClick={logout}
-                  title="Log out"
+                  title={t.logout}
                   className="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
@@ -248,9 +269,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
                     setAuthModalOpen(true);
                     setToolsDropdownOpen(false);
                   }}
-                  className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors"
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-colors"
                 >
-                  Log In
+                  {t.login}
                 </button>
                 <button
                   onClick={() => {
@@ -258,25 +279,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
                     setAuthModalOpen(true);
                     setToolsDropdownOpen(false);
                   }}
-                  className="px-4 py-1.5 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-xs transition-all"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white shadow-soft shadow-brand-500/20 hover:bg-brand-700 transition-all hover:scale-[1.02]"
                 >
-                  Sign Up
+                  <Sparkles className="w-3.5 h-3.5 text-brand-200" />
+                  <span>{t.register}</span>
                 </button>
               </div>
             )}
 
-            <button
-              onClick={() => {
-                onNavigate('/pricing');
-                setToolsDropdownOpen(false);
-              }}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white shadow-xs transition-all group"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
-              <span>Go Pro</span>
-            </button>
-
-            {/* Language Switcher Dropdown */}
+            {/* Global Language Selector Dropdown */}
             <LanguageSwitcher currentPath={currentPath} onNavigate={onNavigate} />
           </div>
 
@@ -293,13 +304,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
           </div>
         </div>
 
-        {/* ========================================================
-            DESKTOP MEGA DROPDOWN PANEL (Anchored inside container)
-            Positioned cleanly with zero off-screen bleeding
-           ======================================================== */}
+        {/* DESKTOP MEGA DROPDOWN PANEL */}
         {toolsDropdownOpen && (
           <>
-            {/* Click-away backdrop overlay */}
             <div
               className="fixed inset-0 z-40 bg-slate-900/10 backdrop-blur-[0.5px]"
               onClick={() => setToolsDropdownOpen(false)}
@@ -313,7 +320,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
             >
               {/* Category Columns Row 1 (4 Columns) */}
               <div className="grid grid-cols-4 gap-6">
-                {CATEGORIES_CONFIG.slice(0, 4).map((cat) => (
+                {localizedCategories.slice(0, 4).map((cat) => (
                   <div key={cat.id} className="space-y-2">
                     <div className="flex items-center gap-1.5 pb-1 border-b border-slate-100">
                       <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
@@ -322,11 +329,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
                     </div>
 
                     <div className="space-y-1">
-                      {ALL_TOOLS.filter((t) => t.category === cat.id).map((tool) => (
+                      {localizedTools.filter((t) => t.category === cat.id).map((tool) => (
                         <button
                           key={tool.id}
                           onClick={() => {
-                            onNavigate(tool.path);
+                            nav(tool.path);
                             setToolsDropdownOpen(false);
                           }}
                           className="w-full text-left flex items-center gap-2.5 px-2 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-brand-600 transition-colors group"
@@ -349,7 +356,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
 
               {/* Category Columns Row 2 (3 Columns) */}
               <div className="mt-6 pt-5 border-t border-slate-100 grid grid-cols-3 gap-6">
-                {CATEGORIES_CONFIG.slice(4).map((cat) => (
+                {localizedCategories.slice(4).map((cat) => (
                   <div key={cat.id} className="space-y-2">
                     <div className="flex items-center gap-1.5 pb-1 border-b border-slate-100">
                       <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
@@ -358,11 +365,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
                     </div>
 
                     <div className="space-y-1">
-                      {ALL_TOOLS.filter((t) => t.category === cat.id).map((tool) => (
+                      {localizedTools.filter((t) => t.category === cat.id).map((tool) => (
                         <button
                           key={tool.id}
                           onClick={() => {
-                            onNavigate(tool.path);
+                            nav(tool.path);
                             setToolsDropdownOpen(false);
                           }}
                           className="w-full text-left flex items-center gap-2.5 px-2 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-brand-600 transition-colors group"
@@ -387,16 +394,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
               <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                 <div className="flex items-center gap-2 font-medium">
                   <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                  <span>100% In-Browser Privacy • Zero Server File Retention</span>
+                  <span>{t.clientPrivacyBadge}</span>
                 </div>
                 <button
                   onClick={() => {
-                    onNavigate('/pricing');
+                    nav('/pricing');
                     setToolsDropdownOpen(false);
                   }}
                   className="font-bold text-brand-600 hover:underline flex items-center gap-1"
                 >
-                  <span>Explore Pro Plans</span>
+                  <span>{t.pricingPlans}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -405,9 +412,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
         )}
       </div>
 
-      {/* ========================================================
-          MOBILE NAVIGATION DRAWER (Fully Responsive & Feature-Packed)
-         ======================================================== */}
+      {/* MOBILE NAVIGATION DRAWER */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-8 space-y-4 max-h-[85vh] overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-150">
           {/* User Status / Quick Auth Banner */}
@@ -419,29 +424,29 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
                 </div>
                 <div>
                   <span className="text-xs font-bold text-slate-900 block">{user.name}</span>
-                  <span className="text-[11px] text-slate-500 capitalize">{user.role} Account</span>
+                  <span className="text-[11px] text-slate-500 capitalize">{user.role}</span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 {user.role === 'admin' && (
                   <button
                     onClick={() => {
-                      onNavigate('/admin');
+                      nav('/admin');
                       setMobileMenuOpen(false);
                     }}
                     className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-amber-400"
                   >
-                    Admin
+                    {t.admin}
                   </button>
                 )}
                 <button
                   onClick={() => {
-                    onNavigate('/dashboard');
+                    nav('/dashboard');
                     setMobileMenuOpen(false);
                   }}
                   className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-brand-50 text-brand-600"
                 >
-                  Dashboard
+                  {t.dashboard}
                 </button>
                 <button
                   onClick={() => {
@@ -449,7 +454,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
                     setMobileMenuOpen(false);
                   }}
                   className="p-1.5 rounded-lg text-slate-400 hover:text-red-600"
-                  title="Logout"
+                  title={t.logout}
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
@@ -465,7 +470,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
                 }}
                 className="py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-white text-slate-700 shadow-2xs"
               >
-                Log In
+                {t.login}
               </button>
               <button
                 onClick={() => {
@@ -475,7 +480,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
                 }}
                 className="py-2.5 rounded-xl text-xs font-bold bg-brand-600 text-white shadow-xs"
               >
-                Sign Up Free
+                {t.register}
               </button>
             </div>
           )}
@@ -483,25 +488,25 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
           {/* Quick Primary Tool Buttons */}
           <div className="grid grid-cols-2 gap-2">
             {[
-              { name: 'Merge PDF', path: '/merge-pdf', icon: 'Files' },
-              { name: 'Split PDF', path: '/split-pdf', icon: 'Scissors' },
-              { name: 'Compress PDF', path: '/compress-pdf', icon: 'Minimize2' },
-              { name: 'Sign PDF', path: '/sign-pdf', icon: 'PenTool' },
+              { name: quickMerge.name, path: '/merge-pdf', icon: 'Files' },
+              { name: quickSplit.name, path: '/split-pdf', icon: 'Scissors' },
+              { name: quickCompress.name, path: '/compress-pdf', icon: 'Minimize2' },
+              { name: quickSign.name, path: '/sign-pdf', icon: 'PenTool' },
             ].map((btn) => (
               <button
                 key={btn.path}
                 onClick={() => {
-                  onNavigate(btn.path);
+                  nav(btn.path);
                   setMobileMenuOpen(false);
                 }}
                 className={`p-3 text-left rounded-xl border transition-all flex items-center gap-2.5 ${
-                  currentPath === btn.path
+                  cleanPath === btn.path
                     ? 'border-brand-500 bg-rose-50 text-brand-700'
                     : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800'
                 }`}
               >
                 <Icon name={btn.icon} className="w-4 h-4 text-brand-600 shrink-0" />
-                <span className="font-bold text-xs">{btn.name}</span>
+                <span className="font-bold text-xs truncate">{btn.name}</span>
               </button>
             ))}
           </div>
@@ -513,7 +518,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
               type="text"
               value={mobileSearch}
               onChange={(e) => setMobileSearch(e.target.value)}
-              placeholder="Search all 31 PDF tools..."
+              placeholder={t.searchToolsPlaceholder}
               className="w-full pl-10 pr-9 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs sm:text-sm focus:bg-white focus:outline-none focus:border-brand-500 transition-all text-slate-900 placeholder:text-slate-400"
             />
             {mobileSearch && (
@@ -536,9 +541,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              All ({ALL_TOOLS.length})
+              {t.allCategories} ({localizedTools.length})
             </button>
-            {CATEGORIES_CONFIG.map((cat) => (
+            {localizedCategories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setSelectedMobileCategory(cat.id)}
@@ -548,7 +553,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
-                {cat.name.replace(' PDF', '')}
+                {cat.name}
               </button>
             ))}
           </div>
@@ -556,7 +561,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
           {/* Tool List in Mobile Drawer */}
           <div className="border-t border-slate-100 pt-3 space-y-1">
             <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 px-1">
-              <span>{mobileSearch ? 'Search Results' : 'Available Tools'}</span>
+              <span>{mobileSearch ? 'Search Results' : t.allTools}</span>
               <span>{mobileFilteredTools.length} tools</span>
             </div>
 
@@ -569,11 +574,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
                 <button
                   key={tool.id}
                   onClick={() => {
-                    onNavigate(tool.path);
+                    nav(tool.path);
                     setMobileMenuOpen(false);
                   }}
                   className={`w-full flex items-center justify-between p-2.5 rounded-xl text-left transition-colors ${
-                    currentPath === tool.path
+                    cleanPath === tool.path
                       ? 'bg-brand-50 text-brand-700'
                       : 'hover:bg-slate-50 text-slate-800'
                   }`}
@@ -610,22 +615,22 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
           <div className="pt-4 border-t border-slate-100 grid grid-cols-2 gap-2 text-center text-xs font-bold">
             <button
               onClick={() => {
-                onNavigate('/pricing');
+                nav('/pricing');
                 setMobileMenuOpen(false);
               }}
               className="py-2.5 rounded-xl bg-slate-900 text-white flex items-center justify-center gap-1.5"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>Go Pro / Pricing</span>
+              <span>{t.pricingPlans}</span>
             </button>
             <button
               onClick={() => {
-                onNavigate('/blog');
+                nav('/blog');
                 setMobileMenuOpen(false);
               }}
               className="py-2.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200"
             >
-              Blog & Tutorials
+              {t.blogAndTutorials}
             </button>
           </div>
         </div>

@@ -22,6 +22,7 @@ const { ALL_LANGUAGES, getPublishedLanguages, isRTL, DEFAULT_LANGUAGE } = requir
 const { ALL_TOOLS } = require('../frontend/src/data/tools.ts');
 const { getToolSeoDetail } = require('../frontend/src/data/toolSeoContent.ts');
 const { getTranslations } = require('../frontend/src/i18n/translations.ts');
+const { getLocalizedTool, getLocalizedToolSeo } = require('../frontend/src/data/localizedTools.ts');
 const { BLOG_POSTS } = require('../frontend/src/data/blogPosts.ts');
 const { GLOBAL_FAQS } = require('../frontend/src/data/faqs.ts');
 
@@ -57,27 +58,28 @@ function cleanBaseTemplate(template) {
 }
 
 // 1. Tool Page Prerender Function
-function generateToolPageHtml(tool, langCode) {
+function generateToolPageHtml(rawTool, langCode) {
   const isDefault = langCode === DEFAULT_LANGUAGE;
   const rtl = isRTL(langCode);
   const t = getTranslations(langCode);
-  const seoDetail = getToolSeoDetail(tool.id);
+  const tool = getLocalizedTool(rawTool, langCode);
+  const seoDetail = getLocalizedToolSeo(rawTool.id, langCode);
 
-  const localizedPath = isDefault ? tool.path : `/${langCode}${tool.path}`;
+  const localizedPath = isDefault ? rawTool.path : `/${langCode}${rawTool.path}`;
   const canonicalUrl = `${SITE_URL}${localizedPath}`;
 
-  const title = `${tool.seoTitle} | SimplePDF`;
+  const title = `${tool.seoTitle || tool.name} | SimplePDF`;
   const description = tool.seoDescription || tool.description;
 
   // Hreflang alternates
   const hreflangTags = publishedLangs
     .map((l) => {
-      const altPath = l.code === DEFAULT_LANGUAGE ? tool.path : `/${l.code}${tool.path}`;
+      const altPath = l.code === DEFAULT_LANGUAGE ? rawTool.path : `/${l.code}${rawTool.path}`;
       return `    <link rel="alternate" hreflang="${l.code}" href="${SITE_URL}${altPath}" />`;
     })
     .join('\n');
 
-  const xDefaultTag = `    <link rel="alternate" hreflang="x-default" href="${SITE_URL}${tool.path}" />`;
+  const xDefaultTag = `    <link rel="alternate" hreflang="x-default" href="${SITE_URL}${rawTool.path}" />`;
 
   // Schemas
   const webAppSchema = {
@@ -100,7 +102,7 @@ function generateToolPageHtml(tool, langCode) {
   const howToSchema = {
     '@context': 'https://schema.org',
     '@type': 'HowTo',
-    name: `How to use ${tool.name} with SimplePDF`,
+    name: t.howToUseTitle.replace('{tool}', tool.name),
     description: tool.seoDescription || tool.description,
     step: tool.howToSteps.map((stepText, idx) => ({
       '@type': 'HowToStep',
@@ -153,7 +155,10 @@ function generateToolPageHtml(tool, langCode) {
     });
   }
 
-  const relatedTools = ALL_TOOLS.filter((t) => t.category === tool.category && t.id !== tool.id).slice(0, 3);
+  const relatedTools = ALL_TOOLS
+    .filter((t) => t.category === rawTool.category && t.id !== rawTool.id)
+    .slice(0, 3)
+    .map((rt) => getLocalizedTool(rt, langCode));
 
   const preRenderedBody = `
   <div class="min-h-screen bg-slate-50 py-6 px-4 sm:px-6 lg:px-8 ${rtl ? 'rtl' : 'ltr'}" data-prerendered="true">

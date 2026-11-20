@@ -24,6 +24,7 @@ export interface ToolMeta {
   maxFilesFree: number;
   maxFileSizeFreeMB: number;
   seoTitle: string;
+  seoDescription: string;
   seoKeywords: string[];
 }
 
@@ -79,3 +80,5 @@ export interface PlanFeature {
   premium: string | boolean;
   business: string | boolean;
 }
+
+export * from './i18n';

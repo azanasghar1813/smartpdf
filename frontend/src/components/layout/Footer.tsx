@@ -13,8 +13,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         {/* Brand & Value Proposition */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 border-b border-slate-800">
           <div className="md:col-span-2 space-y-4">
-            <div
-              onClick={() => onNavigate('/')}
+            <a
+              href="/"
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate('/');
+              }}
               className="inline-flex items-center gap-2 cursor-pointer select-none"
             >
               <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white">
@@ -23,7 +27,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <span className="font-extrabold text-2xl text-white tracking-tight">
                 Simple<span className="text-brand-500">PDF</span>
               </span>
-            </div>
+            </a>
             <p className="text-slate-400 text-sm max-w-md leading-relaxed">
               Every PDF tool you need to manage, edit, convert, and secure documents. 100% free, browser-optimized, and built with uncompromising privacy.
             </p>
@@ -49,29 +53,49 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <button onClick={() => onNavigate('/pricing')} className="hover:text-brand-400 transition-colors">
+                <a
+                  href="/pricing"
+                  onClick={(e) => { e.preventDefault(); onNavigate('/pricing'); }}
+                  className="hover:text-brand-400 transition-colors"
+                >
                   Pricing Plans
-                </button>
+                </a>
               </li>
               <li>
-                <button onClick={() => onNavigate('/blog')} className="hover:text-brand-400 transition-colors">
+                <a
+                  href="/blog"
+                  onClick={(e) => { e.preventDefault(); onNavigate('/blog'); }}
+                  className="hover:text-brand-400 transition-colors"
+                >
                   Blog & Tutorials
-                </button>
+                </a>
               </li>
               <li>
-                <button onClick={() => onNavigate('/about')} className="hover:text-brand-400 transition-colors">
+                <a
+                  href="/about"
+                  onClick={(e) => { e.preventDefault(); onNavigate('/about'); }}
+                  className="hover:text-brand-400 transition-colors"
+                >
                   About Us
-                </button>
+                </a>
               </li>
               <li>
-                <button onClick={() => onNavigate('/contact')} className="hover:text-brand-400 transition-colors">
+                <a
+                  href="/contact"
+                  onClick={(e) => { e.preventDefault(); onNavigate('/contact'); }}
+                  className="hover:text-brand-400 transition-colors"
+                >
                   Contact Support
-                </button>
+                </a>
               </li>
               <li>
-                <button onClick={() => onNavigate('/faq')} className="hover:text-brand-400 transition-colors">
+                <a
+                  href="/faq"
+                  onClick={(e) => { e.preventDefault(); onNavigate('/faq'); }}
+                  className="hover:text-brand-400 transition-colors"
+                >
                   Frequently Asked Questions
-                </button>
+                </a>
               </li>
             </ul>
           </div>
@@ -82,30 +106,46 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <button onClick={() => onNavigate('/privacy')} className="hover:text-brand-400 transition-colors">
+                <a
+                  href="/privacy"
+                  onClick={(e) => { e.preventDefault(); onNavigate('/privacy'); }}
+                  className="hover:text-brand-400 transition-colors"
+                >
                   Privacy Policy
-                </button>
+                </a>
               </li>
               <li>
-                <button onClick={() => onNavigate('/terms')} className="hover:text-brand-400 transition-colors">
+                <a
+                  href="/terms"
+                  onClick={(e) => { e.preventDefault(); onNavigate('/terms'); }}
+                  className="hover:text-brand-400 transition-colors"
+                >
                   Terms of Service
-                </button>
+                </a>
               </li>
               <li>
-                <button onClick={() => onNavigate('/security')} className="hover:text-brand-400 transition-colors">
+                <a
+                  href="/security"
+                  onClick={(e) => { e.preventDefault(); onNavigate('/security'); }}
+                  className="hover:text-brand-400 transition-colors"
+                >
                   Security Architecture
-                </button>
+                </a>
               </li>
               <li>
-                <button onClick={() => onNavigate('/cookies')} className="hover:text-brand-400 transition-colors">
+                <a
+                  href="/cookies"
+                  onClick={(e) => { e.preventDefault(); onNavigate('/cookies'); }}
+                  className="hover:text-brand-400 transition-colors"
+                >
                   Cookie Policy
-                </button>
+                </a>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Categorized Tools Directory */}
+        {/* Categorized Tools Directory (Crawlable Anchor Links) */}
         <div className="py-12 border-b border-slate-800 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-6">
           {CATEGORIES_CONFIG.map((cat) => (
             <div key={cat.id} className="space-y-2.5">
@@ -115,12 +155,16 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <ul className="space-y-1.5 text-xs text-slate-400">
                 {ALL_TOOLS.filter((t) => t.category === cat.id).map((tool) => (
                   <li key={tool.id}>
-                    <button
-                      onClick={() => onNavigate(tool.path)}
-                      className="hover:text-brand-400 transition-colors text-left"
+                    <a
+                      href={tool.path}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onNavigate(tool.path);
+                      }}
+                      className="hover:text-brand-400 transition-colors text-left block"
                     >
                       {tool.name}
-                    </button>
+                    </a>
                   </li>
                 ))}
               </ul>

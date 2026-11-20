@@ -1,38 +1,122 @@
 import React, { useEffect } from 'react';
 import { ToolMeta } from '../../types';
+import { BlogPost } from '../../data/blogPosts';
+import { parsePath, getCanonicalUrl, getHreflangLinks, SITE_URL } from '../../utils/url';
+import { isRTL } from '../../i18n/languages';
+import { getToolSeoDetail } from '../../data/toolSeoContent';
+import { GLOBAL_FAQS } from '../../data/faqs';
 
 interface SEOHeadProps {
   tool?: ToolMeta;
+  blogPost?: BlogPost;
+  currentPath?: string;
   customTitle?: string;
   customDescription?: string;
 }
 
 export const SEOHead: React.FC<SEOHeadProps> = ({
   tool,
+  blogPost,
+  currentPath = window.location.pathname || '/',
   customTitle,
   customDescription,
 }) => {
+  const { lang, cleanPath } = parsePath(currentPath);
+  const rtl = isRTL(lang);
+
+  // 1. Resolve Document Title
   const title =
     customTitle ||
-    (tool ? `${tool.seoTitle} | SimplePDF` : 'SimplePDF — Online PDF Tools for Document Productivity');
+    (blogPost
+      ? `${blogPost.title} | SimplePDF Blog`
+      : tool
+      ? `${tool.seoTitle} | SimplePDF`
+      : cleanPath === '/faq'
+      ? 'Frequently Asked Questions & Support | SimplePDF'
+      : cleanPath === '/pricing'
+      ? 'SimplePDF Pricing — Free and Unlimited Pro PDF Plans'
+      : cleanPath === '/blog'
+      ? 'SimplePDF Blog — PDF Tutorials, Guides & Document Tips'
+      : 'SimplePDF — Online PDF Tools for Document Productivity');
 
+  // 2. Resolve Meta Description (120-160 characters)
   const description =
     customDescription ||
-    (tool
-      ? tool.description
+    (blogPost
+      ? blogPost.excerpt
+      : tool
+      ? tool.seoDescription || tool.description
+      : cleanPath === '/faq'
+      ? 'Find clear answers to questions about SimplePDF tools, privacy guarantees, in-browser WebAssembly security, file retention limits, and subscriptions.'
+      : cleanPath === '/pricing'
+      ? 'Choose between our 100% free plan and Pro with 200MB file limits, batch queues, AI intelligence, and zero ads. Cancel anytime with zero fees.'
       : 'Every PDF tool you need, 100% free and easy to use. Merge, split, compress, convert, rotate, unlock, and protect PDF files in seconds with in-browser privacy.');
 
+  const canonicalUrl = blogPost
+    ? `${SITE_URL}/blog/${blogPost.slug}`
+    : getCanonicalUrl(currentPath);
+
+  const hreflangLinks = getHreflangLinks(cleanPath);
+  const ogImage = `${SITE_URL}/logo.svg`;
+
   useEffect(() => {
-    // 1. Update document title
+    // 1. Update HTML language and text direction attributes
+    document.documentElement.lang = lang;
+    document.documentElement.dir = rtl ? 'rtl' : 'ltr';
+
+    // 2. Update document title
     document.title = title;
 
-    // 2. Update meta description
-    let metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute('content', description);
-    }
+    // Helper to safely set or update a meta tag
+    const setMetaTag = (attributeName: string, attributeValue: string, content: string) => {
+      let meta = document.querySelector(`meta[${attributeName}="${attributeValue}"]`);
+      if (!meta) {
+        meta = document.createElement('meta');
+        meta.setAttribute(attributeName, attributeValue);
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute('content', content);
+    };
 
-    // 3. Update or inject Schema.org JSON-LD structured data
+    // 3. Primary Meta Description & Robots
+    setMetaTag('name', 'description', description);
+    setMetaTag('name', 'robots', 'index, follow');
+
+    // 4. Open Graph Tags
+    setMetaTag('property', 'og:type', blogPost ? 'article' : 'website');
+    setMetaTag('property', 'og:url', canonicalUrl);
+    setMetaTag('property', 'og:title', title);
+    setMetaTag('property', 'og:description', description);
+    setMetaTag('property', 'og:image', ogImage);
+    setMetaTag('property', 'og:site_name', 'SimplePDF');
+
+    // 5. Twitter Card Tags
+    setMetaTag('name', 'twitter:card', 'summary_large_image');
+    setMetaTag('name', 'twitter:url', canonicalUrl);
+    setMetaTag('name', 'twitter:title', title);
+    setMetaTag('name', 'twitter:description', description);
+    setMetaTag('name', 'twitter:image', ogImage);
+
+    // 6. Canonical link
+    let canonicalLink = document.querySelector('link[rel="canonical"]');
+    if (!canonicalLink) {
+      canonicalLink = document.createElement('link');
+      canonicalLink.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalLink);
+    }
+    canonicalLink.setAttribute('href', canonicalUrl);
+
+    // 7. Reciprocal hreflang links
+    document.querySelectorAll('link[rel="alternate"][hreflang]').forEach((el) => el.remove());
+    hreflangLinks.forEach(({ lang: hLang, href }) => {
+      const link = document.createElement('link');
+      link.setAttribute('rel', 'alternate');
+      link.setAttribute('hreflang', hLang);
+      link.setAttribute('href', href);
+      document.head.appendChild(link);
+    });
+
+    // 8. Structured Data JSON-LD
     let scriptTag = document.getElementById('seo-json-ld') as HTMLScriptElement | null;
     if (!scriptTag) {
       scriptTag = document.createElement('script');
@@ -41,39 +125,173 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
       document.head.appendChild(scriptTag);
     }
 
-    const schemaData = tool
-      ? {
-          '@context': 'https://schema.org',
-          '@type': 'WebApplication',
-          name: tool.name,
-          url: `https://simplepdf.com${tool.path}`,
-          description: tool.longDescription,
-          applicationCategory: 'BusinessApplication',
-          operatingSystem: 'All',
-          offers: {
-            '@type': 'Offer',
-            price: '0',
-            priceCurrency: 'USD',
-          },
-          featureList: tool.howToSteps.join('; '),
-        }
-      : {
-          '@context': 'https://schema.org',
-          '@type': 'WebApplication',
-          name: 'SimplePDF',
-          url: 'https://simplepdf.com',
-          description: 'All-in-one online PDF productivity platform.',
-          applicationCategory: 'ProductivityApplication',
-          operatingSystem: 'All',
-          offers: {
-            '@type': 'Offer',
-            price: '0',
-            priceCurrency: 'USD',
-          },
-        };
+    const schemas: any[] = [];
 
-    scriptTag.text = JSON.stringify(schemaData);
-  }, [title, description, tool]);
+    if (tool) {
+      const seoDetail = getToolSeoDetail(tool.id);
+
+      // WebApplication Schema
+      schemas.push({
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        name: `${tool.name} — SimplePDF`,
+        url: canonicalUrl,
+        inLanguage: lang,
+        description: tool.seoDescription || tool.longDescription || tool.description,
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'All',
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'USD',
+        },
+        featureList: tool.howToSteps.join('; '),
+      });
+
+      // HowTo Schema
+      if (tool.howToSteps && tool.howToSteps.length > 0) {
+        schemas.push({
+          '@context': 'https://schema.org',
+          '@type': 'HowTo',
+          name: `How to use ${tool.name} with SimplePDF`,
+          description: tool.seoDescription || tool.description,
+          step: tool.howToSteps.map((stepText, idx) => ({
+            '@type': 'HowToStep',
+            position: idx + 1,
+            name: `Step ${idx + 1}`,
+            text: stepText,
+            url: `${canonicalUrl}#step-${idx + 1}`,
+          })),
+        });
+      }
+
+      // BreadcrumbList Schema
+      schemas.push({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: `${SITE_URL}${lang === 'en' ? '/' : `/${lang}`}`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: tool.category.replace('-', ' '),
+            item: `${SITE_URL}${lang === 'en' ? '/' : `/${lang}`}#${tool.category}`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: tool.name,
+            item: canonicalUrl,
+          },
+        ],
+      });
+
+      // FAQPage Schema for Tool Page
+      if (seoDetail.faqs && seoDetail.faqs.length > 0) {
+        schemas.push({
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: seoDetail.faqs.map((f) => ({
+            '@type': 'Question',
+            name: f.question,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: f.answer,
+            },
+          })),
+        });
+      }
+    } else if (blogPost) {
+      // BlogPosting Schema
+      schemas.push({
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: blogPost.title,
+        description: blogPost.excerpt,
+        url: canonicalUrl,
+        datePublished: '2026-11-18',
+        dateModified: '2026-11-18',
+        author: {
+          '@type': 'Organization',
+          name: blogPost.author || 'SimplePDF Team',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'SimplePDF',
+          url: SITE_URL,
+          logo: `${SITE_URL}/logo.svg`,
+        },
+      });
+
+      schemas.push({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: SITE_URL,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Blog',
+            item: `${SITE_URL}/blog`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: blogPost.title,
+            item: canonicalUrl,
+          },
+        ],
+      });
+    } else if (cleanPath === '/faq') {
+      // FAQPage Schema for /faq route
+      schemas.push({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: GLOBAL_FAQS.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: f.a,
+          },
+        })),
+      });
+    } else {
+      // Organization & WebSite Schema for Home
+      schemas.push({
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'SimplePDF',
+        url: SITE_URL,
+        description: 'All-in-one online PDF productivity platform with in-browser privacy.',
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: `${SITE_URL}/search?q={search_term_string}`,
+          'query-input': 'required name=search_term_string',
+        },
+      });
+
+      schemas.push({
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: 'SimplePDF',
+        url: SITE_URL,
+        logo: `${SITE_URL}/logo.svg`,
+      });
+    }
+
+    scriptTag.text = JSON.stringify(schemas, null, 2);
+  }, [title, description, canonicalUrl, hreflangLinks, tool, blogPost, lang, rtl, cleanPath]);
 
   return null;
 };

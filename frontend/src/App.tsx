@@ -11,15 +11,11 @@ import { FAQSection } from './components/home/FAQSection';
 import { AdPlacement } from './components/ads/AdPlacement';
 import { SEOHead } from './components/common/SEOHead';
 import { ALL_TOOLS } from './data/tools';
-import { BlogPost } from './data/blogPosts';
+import { BLOG_POSTS, BlogPost } from './data/blogPosts';
+import { parsePath } from './utils/url';
 
 // Dynamic Code Splitting for Production Scalability & High Lighthouse Scores
-const ToolWorkspace = lazy(() => import('./components/tools/ToolWorkspace').then(m => ({ default: m.ToolWorkspace })));
-const PDFEditorWorkspace = lazy(() => import('./components/editor/PDFEditorWorkspace').then(m => ({ default: m.PDFEditorWorkspace })));
-const OrganizePdfWorkspace = lazy(() => import('./components/tools/OrganizePdfWorkspace').then(m => ({ default: m.OrganizePdfWorkspace })));
-const AiIntelligenceWorkspace = lazy(() => import('./components/tools/AiIntelligenceWorkspace').then(m => ({ default: m.AiIntelligenceWorkspace })));
-const PdfToMarkdownWorkspace = lazy(() => import('./components/tools/PdfToMarkdownWorkspace').then(m => ({ default: m.PdfToMarkdownWorkspace })));
-const ComparePdfWorkspace = lazy(() => import('./components/tools/ComparePdfWorkspace').then(m => ({ default: m.ComparePdfWorkspace })));
+const ToolLandingPage = lazy(() => import('./components/tools/ToolLandingPage').then(m => ({ default: m.ToolLandingPage })));
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const AdminPage = lazy(() => import('./pages/AdminPage').then(m => ({ default: m.AdminPage })));
 const PricingPage = lazy(() => import('./pages/PricingPage').then(m => ({ default: m.PricingPage })));
@@ -32,6 +28,7 @@ const CookiesPage = lazy(() => import('./pages/CookiesPage').then(m => ({ defaul
 const FaqPage = lazy(() => import('./pages/FaqPage').then(m => ({ default: m.FaqPage })));
 const BlogPage = lazy(() => import('./pages/BlogPage').then(m => ({ default: m.BlogPage })));
 const BlogPostPage = lazy(() => import('./pages/BlogPostPage').then(m => ({ default: m.BlogPostPage })));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
 
 const WorkspaceFallback: React.FC = () => (
   <div className="min-h-[50vh] flex flex-col items-center justify-center p-8 space-y-4">
@@ -44,12 +41,10 @@ const AppContent: React.FC = () => {
   const [currentPath, setCurrentPath] = useState<string>(() => {
     return window.location.pathname || '/';
   });
-  const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
 
   useEffect(() => {
     const handlePopState = () => {
       setCurrentPath(window.location.pathname || '/');
-      setSelectedPost(null);
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -58,67 +53,52 @@ const AppContent: React.FC = () => {
   const navigateTo = (path: string) => {
     window.history.pushState({}, '', path);
     setCurrentPath(path);
-    setSelectedPost(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const currentTool = ALL_TOOLS.find((t) => t.path === currentPath);
+  // Multilingual route resolution
+  const { lang, cleanPath } = parsePath(currentPath);
+  const currentTool = ALL_TOOLS.find((t) => t.path === cleanPath);
+
+  // Blog route resolution
+  const isBlogPost = cleanPath.startsWith('/blog/') && cleanPath.length > 6;
+  const blogSlug = isBlogPost ? cleanPath.replace('/blog/', '').replace(/\/+$/, '') : null;
+  const currentBlogPost = blogSlug ? BLOG_POSTS.find((p) => p.slug === blogSlug) : null;
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
-      <SEOHead tool={currentTool} />
+      <SEOHead
+        tool={currentTool}
+        blogPost={currentBlogPost || undefined}
+        currentPath={currentPath}
+      />
       <Navbar onNavigate={navigateTo} currentPath={currentPath} />
 
       <main className="flex-1">
         <Suspense fallback={<WorkspaceFallback />}>
-          {/* INTERACTIVE WORKSPACES */}
-          {currentPath === '/sign-pdf' ? (
-            <PDFEditorWorkspace toolName="Sign PDF Document" />
-          ) : currentPath === '/edit-pdf' ? (
-            <PDFEditorWorkspace toolName="Edit & Annotate PDF" />
-          ) : currentPath === '/organize-pdf' ? (
-            <OrganizePdfWorkspace />
-          ) : currentPath === '/ai-summarizer' ? (
-            <AiIntelligenceWorkspace mode="summarize" />
-          ) : currentPath === '/translate-pdf' ? (
-            <AiIntelligenceWorkspace mode="translate" />
-          ) : currentPath === '/pdf-to-markdown' ? (
-            <PdfToMarkdownWorkspace />
-          ) : currentPath === '/compare-pdf' ? (
-            <ComparePdfWorkspace />
-          ) : currentPath === '/dashboard' ? (
-            <DashboardPage onNavigate={navigateTo} />
-          ) : currentPath === '/admin' ? (
-            <AdminPage />
-          ) : currentPath === '/blog' ? (
-            selectedPost ? (
-              <BlogPostPage
-                post={selectedPost}
-                onNavigate={navigateTo}
-                onBack={() => setSelectedPost(null)}
-              />
-            ) : (
-              <BlogPage onNavigate={navigateTo} onSelectPost={setSelectedPost} />
-            )
-          ) : currentTool ? (
-            <ToolWorkspace tool={currentTool} onNavigate={navigateTo} />
-          ) : currentPath === '/pricing' ? (
-            <PricingPage onNavigate={navigateTo} />
-          ) : currentPath === '/privacy' ? (
-            <PrivacyPage />
-          ) : currentPath === '/about' ? (
-            <AboutPage onNavigate={navigateTo} />
-          ) : currentPath === '/contact' ? (
-            <ContactPage />
-          ) : currentPath === '/terms' ? (
-            <TermsPage />
-          ) : currentPath === '/security' ? (
-            <SecurityPage />
-          ) : currentPath === '/cookies' ? (
-            <CookiesPage />
-          ) : currentPath === '/faq' ? (
-            <FaqPage />
-          ) : (
+          {currentTool ? (
+            /* DEDICATED TOOL SEO LANDING PAGE WITH EMBEDDED WORKSPACE */
+            <ToolLandingPage
+              tool={currentTool}
+              currentLang={lang}
+              onNavigate={navigateTo}
+            />
+          ) : currentBlogPost ? (
+            /* DEDICATED BLOG POST PAGE */
+            <BlogPostPage
+              post={currentBlogPost}
+              onNavigate={navigateTo}
+              onBack={() => navigateTo('/blog')}
+            />
+          ) : isBlogPost && !currentBlogPost ? (
+            /* 404 for unknown blog slug */
+            <NotFoundPage onNavigate={navigateTo} />
+          ) : cleanPath === '/blog' ? (
+            <BlogPage
+              onNavigate={navigateTo}
+              onSelectPost={(post) => navigateTo(`/blog/${post.slug}`)}
+            />
+          ) : cleanPath === '/' ? (
             <div>
               <Hero onSelectTool={navigateTo} />
               <PopularTools onSelectTool={navigateTo} />
@@ -128,6 +108,29 @@ const AppContent: React.FC = () => {
               <SecurityBanner />
               <FAQSection />
             </div>
+          ) : cleanPath === '/dashboard' ? (
+            <DashboardPage onNavigate={navigateTo} />
+          ) : cleanPath === '/admin' ? (
+            <AdminPage />
+          ) : cleanPath === '/pricing' ? (
+            <PricingPage onNavigate={navigateTo} />
+          ) : cleanPath === '/privacy' ? (
+            <PrivacyPage />
+          ) : cleanPath === '/about' ? (
+            <AboutPage onNavigate={navigateTo} />
+          ) : cleanPath === '/contact' ? (
+            <ContactPage />
+          ) : cleanPath === '/terms' ? (
+            <TermsPage />
+          ) : cleanPath === '/security' ? (
+            <SecurityPage />
+          ) : cleanPath === '/cookies' ? (
+            <CookiesPage />
+          ) : cleanPath === '/faq' ? (
+            <FaqPage />
+          ) : (
+            /* REAL 404 PAGE FOR ANY UNMAPPED ROUTE */
+            <NotFoundPage onNavigate={navigateTo} />
           )}
         </Suspense>
       </main>

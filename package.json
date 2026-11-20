@@ -12,8 +12,9 @@
     "postinstall": "node scripts/patch-pdf-lib.js",
     "dev:frontend": "npm run dev --workspace=frontend",
     "dev:backend": "npm run dev --workspace=backend",
-    "build:frontend": "npm run build --workspace=frontend",
+    "build:frontend": "npm run build --workspace=frontend && npm run build:seo",
     "build:backend": "npm run build --workspace=backend",
+    "build:seo": "npx tsx scripts/generate-sitemaps.js && npx tsx scripts/generate-seo-pages.js",
     "lint": "npm run lint --workspace=frontend",
     "test:audit": "node backend/test_controllers_deep.js",
     "test:secrets": "node scripts/audit-secrets.js",
@@ -23,7 +24,9 @@
     "test:security": "node tests/security.test.js",
     "test:reliability": "node tests/reliability.test.js",
     "test:load": "node tests/load.test.js",
-    "test": "node tests/functional.test.js && node tests/queue.test.js && node tests/security.test.js && node tests/reliability.test.js && node tests/load.test.js"
+    "test:i18n": "node tests/i18n.test.js",
+    "test:audit8": "npx tsx tests/audit-8-fixes.test.js",
+    "test": "node tests/functional.test.js && node tests/queue.test.js && node tests/security.test.js && node tests/reliability.test.js && node tests/load.test.js && node tests/i18n.test.js && npx tsx tests/audit-8-fixes.test.js"
   },
   "keywords": [
     "pdf",

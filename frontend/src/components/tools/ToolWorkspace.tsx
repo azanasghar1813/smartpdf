@@ -584,7 +584,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({ tool, onNavigate }
                       {item.previewUrl ? (
                         <img
                           src={item.previewUrl}
-                          alt="Page thumbnail"
+                          alt={`${tool.name} preview thumbnail ${index + 1}: ${item.name}`}
                           className="w-12 h-14 object-cover rounded-md border border-slate-300 shadow-xs flex-shrink-0 bg-white"
                         />
                       ) : (
@@ -940,7 +940,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({ tool, onNavigate }
                       <div key={img.pageNum} className="bg-slate-50 rounded-xl p-3 border border-slate-200 space-y-2">
                         <img
                           src={img.dataUrl}
-                          alt={`Page ${img.pageNum}`}
+                          alt={`${tool.name} extracted page ${img.pageNum} high-resolution image preview`}
                           className="w-full h-36 object-contain rounded bg-white border border-slate-200 shadow-2xs"
                         />
                         <div className="flex items-center justify-between text-[11px]">

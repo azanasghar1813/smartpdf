@@ -1,4 +1,4 @@
-import { ToolMeta, ToolCategory } from '../types';
+import { ToolMeta, ToolCategory } from '../types/index';
 
 export const CATEGORIES_CONFIG: {
   id: ToolCategory;
@@ -67,6 +67,7 @@ export const ALL_TOOLS: ToolMeta[] = [
     maxFilesFree: 10,
     maxFileSizeFreeMB: 50,
     seoTitle: 'Merge PDF Online — Combine Multiple PDF Files Free',
+    seoDescription: 'Combine multiple PDF files into one document for free. Drag and drop to reorder pages with 100% in-browser privacy and zero file uploads.',
     seoKeywords: ['merge pdf', 'combine pdf', 'join pdf files', 'pdf merger online free'],
     howToSteps: [
       'Select or drag and drop multiple PDF files into the dropzone.',
@@ -89,7 +90,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.pdf'],
     maxFilesFree: 1,
     maxFileSizeFreeMB: 50,
-    seoTitle: 'Split PDF Online — Extract and Separate PDF Pages Free',
+    seoTitle: 'Split PDF Online — Separate & Extract PDF Pages Free',
+    seoDescription: 'Split PDF files into individual pages or custom ranges instantly. 100% private in-browser processing with no file size limits on free tier.',
     seoKeywords: ['split pdf', 'separate pdf pages', 'extract pdf pages', 'cut pdf'],
     howToSteps: [
       'Upload the PDF you want to split.',
@@ -111,7 +113,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.pdf'],
     maxFilesFree: 1,
     maxFileSizeFreeMB: 50,
-    seoTitle: 'Remove Pages from PDF Online Free',
+    seoTitle: 'Remove Pages from PDF Online — Delete PDF Pages Free',
+    seoDescription: 'Delete unwanted pages from your PDF document online for free. Select and remove pages instantly in your browser without uploading files.',
     seoKeywords: ['remove pdf pages', 'delete pages from pdf', 'cut out pdf pages'],
     howToSteps: [
       'Upload your PDF document.',
@@ -133,7 +136,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.pdf'],
     maxFilesFree: 1,
     maxFileSizeFreeMB: 50,
-    seoTitle: 'Extract Pages from PDF Online Free',
+    seoTitle: 'Extract Pages from PDF Online — Save Specific Pages',
+    seoDescription: 'Extract specific pages from any PDF document and save them as a new file. Fast, free in-browser extraction with complete document privacy.',
     seoKeywords: ['extract pdf pages', 'export pdf pages', 'select pdf pages'],
     howToSteps: [
       'Upload your PDF file.',
@@ -155,7 +159,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.pdf'],
     maxFilesFree: 1,
     maxFileSizeFreeMB: 50,
-    seoTitle: 'Organize PDF Pages Online — Rearrange, Rotate & Delete',
+    seoTitle: 'Organize PDF Pages Online — Reorder, Rotate & Delete',
+    seoDescription: 'Sort, rotate, and delete PDF pages with visual drag-and-drop ease. Organize documents directly in your web browser with 100% local privacy.',
     seoKeywords: ['organize pdf', 'reorder pdf pages', 'rearrange pdf pages'],
     howToSteps: [
       'Upload your PDF to open the interactive page manager.',
@@ -181,6 +186,7 @@ export const ALL_TOOLS: ToolMeta[] = [
     maxFilesFree: 2,
     maxFileSizeFreeMB: 40,
     seoTitle: 'Compress PDF Online — Reduce PDF File Size Free',
+    seoDescription: 'Reduce PDF file size while keeping crisp text and sharp images. Fast, free online compression with automatic file deletion within 60 minutes.',
     seoKeywords: ['compress pdf', 'reduce pdf size', 'shrink pdf', 'pdf compressor online free'],
     howToSteps: [
       'Upload the PDF file you wish to compress.',
@@ -202,7 +208,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.pdf'],
     maxFilesFree: 1,
     maxFileSizeFreeMB: 25,
-    seoTitle: 'Repair Corrupted PDF Online Free',
+    seoTitle: 'Repair PDF Online — Fix Damaged or Corrupted PDF',
+    seoDescription: 'Recover and repair damaged or unreadable PDF files online for free. Rebuild cross-reference tables and recover pages with automatic cloud purge.',
     seoKeywords: ['repair pdf', 'fix corrupt pdf', 'recover damaged pdf file'],
     howToSteps: [
       'Upload your damaged or unreadable PDF file.',
@@ -225,7 +232,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.pdf', '.jpg', '.png'],
     maxFilesFree: 1,
     maxFileSizeFreeMB: 20,
-    seoTitle: 'OCR PDF Online — Convert Scanned PDF to Searchable Text',
+    seoTitle: 'OCR PDF Online — Convert Scanned PDF to Searchable',
+    seoDescription: 'Convert scanned PDFs into searchable, selectable text with advanced OCR. Free text recognition with automatic file deletion within 60 minutes.',
     seoKeywords: ['ocr pdf', 'searchable pdf', 'recognize text in pdf', 'tesseract ocr'],
     howToSteps: [
       'Upload your scanned PDF document or images.',
@@ -250,7 +258,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.jpg', '.jpeg', '.png', '.webp'],
     maxFilesFree: 15,
     maxFileSizeFreeMB: 30,
-    seoTitle: 'JPG to PDF — Convert Images to PDF Online Free',
+    seoTitle: 'JPG to PDF Online — Convert Images to PDF Free',
+    seoDescription: 'Convert JPG, PNG, and image files into a single clean PDF document. Reorder photos and adjust margins with 100% private in-browser processing.',
     seoKeywords: ['jpg to pdf', 'image to pdf', 'png to pdf', 'convert photo to pdf'],
     howToSteps: [
       'Upload one or more JPG/PNG images.',
@@ -273,7 +282,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.doc', '.docx'],
     maxFilesFree: 2,
     maxFileSizeFreeMB: 25,
-    seoTitle: 'Word to PDF Converter Online Free (DOC to PDF)',
+    seoTitle: 'Word to PDF Online — Convert DOCX to PDF Free',
+    seoDescription: 'Convert Microsoft Word DOC and DOCX files to PDF documents online for free. Preserves fonts, layouts, and styles with auto-deletion in 60 min.',
     seoKeywords: ['word to pdf', 'docx to pdf', 'convert word to pdf online free'],
     howToSteps: [
       'Upload your DOC or DOCX document.',
@@ -295,7 +305,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.ppt', '.pptx'],
     maxFilesFree: 2,
     maxFileSizeFreeMB: 30,
-    seoTitle: 'PowerPoint to PDF — Convert PPT & PPTX to PDF',
+    seoTitle: 'PowerPoint to PDF — Convert PPT & PPTX Online Free',
+    seoDescription: 'Convert PowerPoint slides into high-resolution PDF presentations for free. Retains vector graphics and slide layouts with auto-purge in 60 min.',
     seoKeywords: ['powerpoint to pdf', 'ppt to pdf', 'pptx to pdf online'],
     howToSteps: [
       'Upload your PowerPoint presentation file.',
@@ -317,7 +328,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.xls', '.xlsx', '.csv'],
     maxFilesFree: 2,
     maxFileSizeFreeMB: 25,
-    seoTitle: 'Excel to PDF — Convert XLS & XLSX Spreadsheets Online Free',
+    seoTitle: 'Excel to PDF — Convert XLS & XLSX Spreadsheets Free',
+    seoDescription: 'Convert Excel spreadsheets into structured PDF tables online for free. Formats rows and columns cleanly with secure cloud deletion in 60 min.',
     seoKeywords: ['excel to pdf', 'xlsx to pdf', 'convert spreadsheet to pdf'],
     howToSteps: [
       'Upload your Excel spreadsheet.',
@@ -339,7 +351,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.html', '.htm'],
     maxFilesFree: 1,
     maxFileSizeFreeMB: 10,
-    seoTitle: 'HTML to PDF Converter Online Free — URL to PDF',
+    seoTitle: 'HTML to PDF Converter — Convert Webpages Online Free',
+    seoDescription: 'Convert HTML files and web code into printable, shareable PDF documents online. Fast, free rendering with automatic cloud purge in 60 minutes.',
     seoKeywords: ['html to pdf', 'url to pdf', 'webpage to pdf converter'],
     howToSteps: [
       'Enter the public URL of the webpage or upload your HTML file.',
@@ -364,7 +377,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.pdf'],
     maxFilesFree: 1,
     maxFileSizeFreeMB: 40,
-    seoTitle: 'PDF to JPG — Extract PDF Pages to Images Online Free',
+    seoTitle: 'PDF to JPG Online — Extract PDF Pages to Images Free',
+    seoDescription: 'Extract PDF pages as high-resolution JPG images for free. Fast, private client-side rendering with zero file uploads or quality loss.',
     seoKeywords: ['pdf to jpg', 'pdf to image', 'convert pdf to jpeg', 'pdf to png'],
     howToSteps: [
       'Upload your PDF file.',
@@ -387,7 +401,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.pdf'],
     maxFilesFree: 1,
     maxFileSizeFreeMB: 25,
-    seoTitle: 'PDF to Word Converter — Convert PDF to Editable DOCX Free',
+    seoTitle: 'PDF to Word Converter — Convert PDF to DOCX Free',
+    seoDescription: 'Convert PDF documents to editable Microsoft Word DOCX files online for free. Retains formatting, tables, and paragraphs with auto-purge in 60m.',
     seoKeywords: ['pdf to word', 'pdf to docx', 'editable word from pdf', 'convert pdf to doc'],
     howToSteps: [
       'Upload the PDF file you need to edit.',
@@ -409,7 +424,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.pdf'],
     maxFilesFree: 1,
     maxFileSizeFreeMB: 25,
-    seoTitle: 'PDF to PowerPoint Converter — PDF to PPTX Online Free',
+    seoTitle: 'PDF to PowerPoint — Convert PDF to PPTX Online Free',
+    seoDescription: 'Convert PDF pages into editable PowerPoint PPTX slides online for free. Keep text and layout intact with automatic cloud file deletion in 60m.',
     seoKeywords: ['pdf to powerpoint', 'pdf to ppt', 'pdf to pptx converter'],
     howToSteps: [
       'Upload your PDF presentation document.',
@@ -431,7 +447,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.pdf'],
     maxFilesFree: 1,
     maxFileSizeFreeMB: 20,
-    seoTitle: 'PDF to Excel Converter — Extract PDF Tables to XLSX Free',
+    seoTitle: 'PDF to Excel Converter — Extract PDF Tables to XLSX',
+    seoDescription: 'Extract tables from PDF files into editable Excel XLSX spreadsheets online for free. Accurate cell formatting with auto-deletion in 60 minutes.',
     seoKeywords: ['pdf to excel', 'pdf to xlsx', 'extract tables from pdf', 'pdf table converter'],
     howToSteps: [
       'Upload your PDF document containing data tables.',
@@ -454,6 +471,7 @@ export const ALL_TOOLS: ToolMeta[] = [
     maxFilesFree: 1,
     maxFileSizeFreeMB: 25,
     seoTitle: 'PDF to PDF/A Converter — ISO Archival PDF Online',
+    seoDescription: 'Convert PDF documents to ISO-compliant PDF/A format for long-term digital preservation. Fast, free conversion with auto-deletion within 60 min.',
     seoKeywords: ['pdf to pdf/a', 'pdf archive', 'iso 19005', 'pdfa compliance'],
     howToSteps: [
       'Upload your PDF file.',
@@ -476,7 +494,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.pdf'],
     maxFilesFree: 1,
     maxFileSizeFreeMB: 20,
-    seoTitle: 'PDF to Markdown Converter — Clean Markdown for AI & Docs',
+    seoTitle: 'PDF to Markdown Converter — Clean Markdown for AI',
+    seoDescription: 'Convert PDF documents into structured Markdown text for ChatGPT, Claude, and notes. Free, instant client-side conversion with 100% privacy.',
     seoKeywords: ['pdf to markdown', 'pdf to md', 'extract text from pdf to markdown'],
     howToSteps: [
       'Upload your PDF document.',
@@ -502,6 +521,7 @@ export const ALL_TOOLS: ToolMeta[] = [
     maxFilesFree: 5,
     maxFileSizeFreeMB: 50,
     seoTitle: 'Rotate PDF Online — Permanently Rotate PDF Pages Free',
+    seoDescription: 'Rotate PDF pages 90, 180, or 270 degrees and save them permanently. Fast, free in-browser rotation with zero file uploads and 100% privacy.',
     seoKeywords: ['rotate pdf', 'turn pdf upside down', 'rotate pdf 90 degrees', 'rotate pdf online free'],
     howToSteps: [
       'Upload your PDF document.',
@@ -523,7 +543,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.pdf'],
     maxFilesFree: 1,
     maxFileSizeFreeMB: 50,
-    seoTitle: 'Add Page Numbers to PDF Online Free',
+    seoTitle: 'Add Page Numbers to PDF Online — Number PDF Pages',
+    seoDescription: 'Add customized page numbers to PDF documents online for free. Choose position, font style, and starting index with 100% in-browser privacy.',
     seoKeywords: ['add page numbers to pdf', 'number pdf pages', 'pdf pagination online'],
     howToSteps: [
       'Upload your PDF document.',
@@ -545,7 +566,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.pdf'],
     maxFilesFree: 1,
     maxFileSizeFreeMB: 50,
-    seoTitle: 'Add Watermark to PDF Online Free — Text & Image Watermarks',
+    seoTitle: 'Add Watermark to PDF Online — Stamp Text or Logo',
+    seoDescription: 'Stamp custom text or image watermarks onto your PDF pages for free. Protect confidential documents directly in your browser with zero uploads.',
     seoKeywords: ['add watermark to pdf', 'watermark pdf online free', 'stamp pdf confidential'],
     howToSteps: [
       'Upload your PDF document.',
@@ -568,6 +590,7 @@ export const ALL_TOOLS: ToolMeta[] = [
     maxFilesFree: 1,
     maxFileSizeFreeMB: 40,
     seoTitle: 'Crop PDF Online — Trim PDF Margins Free',
+    seoDescription: 'Crop and trim PDF margins or page boundaries online for free. Adjust visible page dimensions visually with private client-side processing.',
     seoKeywords: ['crop pdf', 'trim pdf margins', 'cut pdf borders online'],
     howToSteps: [
       'Upload your PDF file.',
@@ -591,6 +614,7 @@ export const ALL_TOOLS: ToolMeta[] = [
     maxFilesFree: 1,
     maxFileSizeFreeMB: 40,
     seoTitle: 'Edit PDF Online — Free Web PDF Editor & Annotator',
+    seoDescription: 'Add text, annotations, highlights, and drawings to any PDF document for free. Edit files directly in your web browser with 100% data privacy.',
     seoKeywords: ['edit pdf online', 'free pdf editor', 'annotate pdf', 'add text to pdf'],
     howToSteps: [
       'Upload the PDF you want to annotate or edit.',
@@ -615,7 +639,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.pdf'],
     maxFilesFree: 2,
     maxFileSizeFreeMB: 50,
-    seoTitle: 'Protect PDF with Password Online Free — Encrypt PDF',
+    seoTitle: 'Protect PDF with Password Online — Encrypt PDF Free',
+    seoDescription: 'Encrypt PDF files with robust password protection and custom permissions for free. Secure sensitive documents in-browser with zero uploads.',
     seoKeywords: ['protect pdf', 'password protect pdf', 'encrypt pdf online free', 'lock pdf'],
     howToSteps: [
       'Upload your PDF document.',
@@ -637,7 +662,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.pdf'],
     maxFilesFree: 2,
     maxFileSizeFreeMB: 50,
-    seoTitle: 'Unlock PDF Online — Remove PDF Password Restrictions Free',
+    seoTitle: 'Unlock PDF Online — Remove Password Restrictions',
+    seoDescription: 'Remove owner passwords and printing restrictions from PDF documents online for free. Instant in-browser decryption with complete privacy.',
     seoKeywords: ['unlock pdf', 'remove pdf password', 'decrypt pdf', 'pdf unlocker online'],
     howToSteps: [
       'Upload your password-protected PDF document.',
@@ -661,6 +687,7 @@ export const ALL_TOOLS: ToolMeta[] = [
     maxFilesFree: 1,
     maxFileSizeFreeMB: 30,
     seoTitle: 'Sign PDF Online — Free Electronic Signature for PDFs',
+    seoDescription: 'Create legally binding electronic signatures and sign PDF contracts online for free. Draw, type, or upload signatures with 100% local privacy.',
     seoKeywords: ['sign pdf', 'e-sign pdf online', 'electronically sign document', 'free pdf signature'],
     howToSteps: [
       'Upload the document that requires signing.',
@@ -682,7 +709,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.pdf'],
     maxFilesFree: 1,
     maxFileSizeFreeMB: 30,
-    seoTitle: 'Redact PDF Online — Permanently Sanitize Sensitive Data Free',
+    seoTitle: 'Redact PDF Online — Permanently Sanitize Data Free',
+    seoDescription: 'Permanently black out and sanitize confidential text and numbers from PDF files for free. Destructive in-browser redaction with zero leaks.',
     seoKeywords: ['redact pdf', 'black out text in pdf', 'sanitize pdf', 'remove confidential info'],
     howToSteps: [
       'Upload your PDF document.',
@@ -707,7 +735,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.pdf'],
     maxFilesFree: 1,
     maxFileSizeFreeMB: 15,
-    seoTitle: 'AI PDF Summarizer — Summarize PDF Documents with AI Free',
+    seoTitle: 'AI PDF Summarizer — Summarize PDF Documents with AI',
+    seoDescription: 'Summarize long PDF research papers, reports, and books in seconds with AI. Extract key takeaways and executive summaries with auto-purge in 60m.',
     seoKeywords: ['ai pdf summarizer', 'summarize pdf with ai', 'ai document summary', 'chat with pdf'],
     howToSteps: [
       'Upload your PDF document (reports, papers, books).',
@@ -731,6 +760,7 @@ export const ALL_TOOLS: ToolMeta[] = [
     maxFilesFree: 1,
     maxFileSizeFreeMB: 15,
     seoTitle: 'Translate PDF Online — Free AI Document Translator',
+    seoDescription: 'Translate PDF documents into over 50 languages while preserving original layout and fonts. Fast AI translation with automatic purge within 60m.',
     seoKeywords: ['translate pdf', 'ai document translation', 'translate pdf preserve formatting'],
     howToSteps: [
       'Upload your foreign-language PDF.',
@@ -753,7 +783,8 @@ export const ALL_TOOLS: ToolMeta[] = [
     acceptedFileTypes: ['.pdf'],
     maxFilesFree: 2,
     maxFileSizeFreeMB: 25,
-    seoTitle: 'Compare PDF Files Online Free — Visual Document Diff',
+    seoTitle: 'Compare PDF Files Online — Visual Document Diff Free',
+    seoDescription: 'Compare two PDF documents side by side to highlight visual and text differences for free. Instant in-browser comparison with complete privacy.',
     seoKeywords: ['compare pdf files', 'pdf diff tool', 'check differences between two pdfs'],
     howToSteps: [
       'Upload Document A (original version) and Document B (new revision).',
@@ -776,6 +807,7 @@ export const ALL_TOOLS: ToolMeta[] = [
     maxFilesFree: 1,
     maxFileSizeFreeMB: 25,
     seoTitle: 'Fill PDF Forms Online Free — Interactive Form Filler',
+    seoDescription: 'Fill out interactive AcroForm PDF forms, checkboxes, and text fields online for free. Save and print completed forms with 100% in-browser privacy.',
     seoKeywords: ['fill pdf forms', 'pdf form filler online free', 'acroform fill'],
     howToSteps: [
       'Upload your PDF form.',

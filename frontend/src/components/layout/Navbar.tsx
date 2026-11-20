@@ -3,6 +3,7 @@ import { ALL_TOOLS, CATEGORIES_CONFIG } from '../../data/tools';
 import { Icon } from '../common/Icon';
 import { useAuth } from '../../context/AuthContext';
 import { AuthModal } from '../auth/AuthModal';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import {
   Menu,
   X,
@@ -274,10 +275,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
               <Sparkles className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
               <span>Go Pro</span>
             </button>
+
+            {/* Language Switcher Dropdown */}
+            <LanguageSwitcher currentPath={currentPath} onNavigate={onNavigate} />
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="flex lg:hidden items-center">
+          {/* Mobile Actions: Language Switcher + Hamburger */}
+          <div className="flex lg:hidden items-center gap-2">
+            <LanguageSwitcher currentPath={currentPath} onNavigate={onNavigate} />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-xl text-slate-700 hover:text-brand-600 hover:bg-slate-100 transition-colors"

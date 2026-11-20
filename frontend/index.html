@@ -6,10 +6,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SimplePDF — Online PDF Tools for Document Productivity</title>
     <meta name="description" content="Every PDF tool you need, 100% free and easy to use. Merge, split, compress, convert, rotate, unlock, and protect PDF files in seconds with SimplePDF." />
+    
+    <!-- Canonical & Search Directives -->
+    <link rel="canonical" href="https://simplepdf.me/" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Google Search Console Verification -->
+    <meta name="google-site-verification" content="%VITE_GSC_VERIFICATION%" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://simplepdf.me/" />
+    <meta property="og:title" content="SimplePDF — Online PDF Tools for Document Productivity" />
+    <meta property="og:description" content="Every PDF tool you need, 100% free and easy to use. Merge, split, compress, convert, rotate, unlock, and protect PDF files in seconds with SimplePDF." />
+    <meta property="og:image" content="https://simplepdf.me/logo.svg" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://simplepdf.me/" />
+    <meta name="twitter:title" content="SimplePDF — Online PDF Tools for Document Productivity" />
+    <meta name="twitter:description" content="Every PDF tool you need, 100% free and easy to use. Merge, split, compress, convert, rotate, unlock, and protect PDF files in seconds with SimplePDF." />
+    <meta name="twitter:image" content="https://simplepdf.me/logo.svg" />
+
+    <!-- Google Analytics 4 (GA4) with Zero-PII Privacy Protection -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_MEASUREMENT_ID%"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      // Anonymize IP and never send document filenames or file content
+      gtag('config', '%VITE_GA_MEASUREMENT_ID%', {
+        anonymize_ip: true,
+        send_page_view: true
+      });
+    </script>
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <!-- PDF.js CDN for Client-Side Rendering & Thumbnails -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>

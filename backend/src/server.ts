@@ -7,6 +7,7 @@ import authRoutes from './routes/auth.routes';
 import toolsRoutes from './routes/tools.routes';
 import aiRoutes from './routes/ai.routes';
 import paymentRoutes from './routes/payment.routes';
+import translationRoutes from './routes/translation.routes';
 import { dbRepository } from './database/repository';
 import { redisConnection } from './queues/connection';
 import { storage } from './storage/storageProvider';
@@ -114,6 +115,7 @@ app.use('/api/v1/jobs', jobLimiter);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/ai', aiRoutes);
 app.use('/api/v1/payment', paymentRoutes);
+app.use('/api/v1/i18n', translationRoutes);
 app.use('/api/v1', toolsRoutes);
 
 // Liveness Probe (Kubernetes / Nginx / Load Balancers)

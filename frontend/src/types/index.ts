@@ -7,6 +7,11 @@ export type ToolCategory =
   | 'security'
   | 'intelligence';
 
+export interface ToolFaq {
+  question: string;
+  answer: string;
+}
+
 export interface ToolMeta {
   id: string;
   name: string;
@@ -22,8 +27,14 @@ export interface ToolMeta {
   maxFilesFree: number;
   maxFileSizeFreeMB: number;
   seoTitle: string;
+  seoDescription: string;
   seoKeywords: string[];
   howToSteps: string[];
+  features?: string[];
+  limitations?: string[];
+  useCases?: string[];
+  faqs?: ToolFaq[];
+  privacyNote?: string;
 }
 
 export type JobStatus =

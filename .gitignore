@@ -1,0 +1,142 @@
+# ==============================================================================
+# SimplePDF — Production .gitignore
+# Enterprise-grade Git exclusion rules for clean, secure repository publishing.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Dependency Directories & Package Managers
+# ------------------------------------------------------------------------------
+node_modules/
+*/node_modules/
+.pnp
+.pnp.js
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ------------------------------------------------------------------------------
+# 2. Environment Variables, Credentials & Secret Keys
+# (Never commit actual credentials, private keys or tokens to GitHub)
+# ------------------------------------------------------------------------------
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
+# Cryptographic Keys & Certificates
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+secrets/
+
+# ------------------------------------------------------------------------------
+# 3. Compilation & Build Distribution Outputs
+# ------------------------------------------------------------------------------
+dist/
+*/dist/
+build/
+*/build/
+out/
+.next/
+.nuxt/
+.cache/
+*.tsbuildinfo
+.vite/
+frontend/dist/
+backend/dist/
+
+# ------------------------------------------------------------------------------
+# 4. Ephemeral Storage, Temporary Files & Uploads
+# (Preserve directory structure via .gitkeep without committing user files)
+# ------------------------------------------------------------------------------
+temp_storage/*
+!temp_storage/.gitkeep
+backend/temp_storage/*
+!backend/temp_storage/.gitkeep
+temp/
+tmp/
+uploads/
+downloads/
+*.tmp
+*.temp
+
+# ------------------------------------------------------------------------------
+# 5. Local Databases, Persistent State & Dump Files
+# ------------------------------------------------------------------------------
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.dump
+*.sql.gz
+*.rdb
+pgdata/
+redisdata/
+simplepdf_db.json
+iloveyoupdf_db.json
+temp_storage/*.json
+backend/temp_storage/*.json
+prisma/migrations/json_data_import.sql
+
+# ------------------------------------------------------------------------------
+# 6. Logging, Telemetry & Diagnostics
+# ------------------------------------------------------------------------------
+logs/
+*.log
+*.log.*
+
+# ------------------------------------------------------------------------------
+# 7. Operating System Artifacts (Windows, macOS, Linux)
+# ------------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ------------------------------------------------------------------------------
+# 8. IDE & Editor Artifacts
+# ------------------------------------------------------------------------------
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*.swo
+
+# ------------------------------------------------------------------------------
+# 9. Test Coverage & Profiling
+# ------------------------------------------------------------------------------
+coverage/
+.nyc_output/
+*.lcov
+.clinic/
+
+# ------------------------------------------------------------------------------
+# 10. Docker Local Overrides
+# ------------------------------------------------------------------------------
+docker-compose.override.yml
+.docker/

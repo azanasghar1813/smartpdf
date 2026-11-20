@@ -1,0 +1,156 @@
+// SimplePDF Enterprise Database Schema
+// Optimized for PostgreSQL with connection pooling, indexes, and relational integrity
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  user
+  admin
+}
+
+enum Tier {
+  free
+  premium
+  business
+}
+
+enum JobStatus {
+  queued
+  processing
+  completed
+  failed
+  cancelled
+}
+
+enum SubscriptionStatus {
+  active
+  canceled
+  past_due
+  expired
+}
+
+model User {
+  id              String         @id @default(uuid())
+  email           String         @unique
+  passwordHash    String?
+  name            String
+  role            Role           @default(user)
+  tier            Tier           @default(free)
+  usageToday      Int            @default(0)
+  totalProcessed  Int            @default(0)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  sessions        Session[]
+  jobs            Job[]
+  subscriptions   Subscription[]
+  transactions    Transaction[]
+
+  @@index([email])
+  @@index([role])
+  @@index([tier])
+  @@map("users")
+}
+
+model Session {
+  id           String    @id @default(uuid())
+  userId       String
+  tokenHash    String    @unique
+  userAgent    String?
+  ipAddress    String?
+  expiresAt    DateTime
+  revoked      Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("sessions")
+}
+
+model Job {
+  id             String     @id @default(uuid())
+  toolId         String
+  status         JobStatus  @default(queued)
+  progress       Int        @default(0)
+  fileName       String
+  fileSize       Int
+  storageKey     String?    // Secure object key in shared storage
+  resultFileName String?
+  resultKey      String?    // Secure output object key in shared storage
+  downloadUrl    String?
+  error          String?
+  attempts       Int        @default(0)
+  priority       Int        @default(0)
+  metadata       Json?
+  userId         String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  startedAt      DateTime?
+  completedAt    DateTime?
+
+  user           User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([userId])
+  @@index([toolId])
+  @@index([createdAt])
+  @@map("jobs")
+}
+
+model Subscription {
+  id           String             @id @default(uuid())
+  userId       String
+  tier         Tier               @default(premium)
+  amount       Decimal            @db.Decimal(10, 2)
+  currency     String             @default("USD")
+  status       SubscriptionStatus @default(active)
+  renewalDate  DateTime
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model Transaction {
+  id             String        @id @default(uuid())
+  userId         String
+  subscriptionId String?
+  amount         Decimal       @db.Decimal(10, 2)
+  currency       String        @default("USD")
+  status         String        @default("succeeded") // succeeded, failed, refunded
+  provider       String        @default("stripe")    // stripe, paddle, lemonsqueezy
+  providerTxId   String?       @unique
+  metadata       Json?
+  createdAt      DateTime      @default(now())
+
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([providerTxId])
+  @@map("transactions")
+}
+
+model PlatformMetric {
+  id                         String   @id @default("singleton_metrics")
+  totalProcessedJobs         BigInt   @default(0)
+  edgeBandwidthSavedGB       Decimal  @default(0) @db.Decimal(12, 2)
+  ephemeralFilesPurgedCount  BigInt   @default(0)
+  updatedAt                  DateTime @updatedAt
+
+  @@map("platform_metrics")
+}

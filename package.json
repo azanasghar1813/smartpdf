@@ -1,0 +1,39 @@
+{
+  "name": "simplepdf-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SimplePDF — Complete PDF Productivity Platform",
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared"
+  ],
+  "scripts": {
+    "postinstall": "node scripts/patch-pdf-lib.js",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:backend": "npm run dev --workspace=backend",
+    "build:frontend": "npm run build --workspace=frontend",
+    "build:backend": "npm run build --workspace=backend",
+    "lint": "npm run lint --workspace=frontend",
+    "test:audit": "node backend/test_controllers_deep.js",
+    "test:secrets": "node scripts/audit-secrets.js",
+    "test:benchmark": "node scripts/benchmark-in-memory.js",
+    "test:functional": "node tests/functional.test.js",
+    "test:queue": "node tests/queue.test.js",
+    "test:security": "node tests/security.test.js",
+    "test:reliability": "node tests/reliability.test.js",
+    "test:load": "node tests/load.test.js",
+    "test": "node tests/functional.test.js && node tests/queue.test.js && node tests/security.test.js && node tests/reliability.test.js && node tests/load.test.js"
+  },
+  "keywords": [
+    "pdf",
+    "pdf-tools",
+    "merge-pdf",
+    "compress-pdf",
+    "convert-pdf",
+    "simplepdf",
+    "pdf-productivity"
+  ],
+  "author": "SimplePDF Team",
+  "license": "UNLICENSED"
+}

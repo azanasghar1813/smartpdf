@@ -1,0 +1,126 @@
+version: '3.8'
+
+services:
+  # Nginx Enterprise Reverse Proxy & Load Balancer
+  nginx:
+    image: nginx:alpine
+    container_name: simplepdf_loadbalancer
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend/dist:/usr/share/nginx/html:ro
+    depends_on:
+      - backend-1
+      - backend-2
+
+  # Scalable Node.js API Instance 1
+  backend-1:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: simplepdf_api_1
+    restart: unless-stopped
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - CLUSTER_MODE=false
+      - RUN_STANDALONE_WORKER=false
+      - DATABASE_URL=postgresql://postgres:postgrespassword@postgres:5432/simplepdf
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - TRUST_PROXY=true
+    volumes:
+      - shared_temp_storage:/app/temp_storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Scalable Node.js API Instance 2 (Demonstrating Horizontally Scaled Multi-Instance Deployment)
+  backend-2:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: simplepdf_api_2
+    restart: unless-stopped
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - CLUSTER_MODE=false
+      - RUN_STANDALONE_WORKER=false
+      - DATABASE_URL=postgresql://postgres:postgrespassword@postgres:5432/simplepdf
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - TRUST_PROXY=true
+    volumes:
+      - shared_temp_storage:/app/temp_storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Dedicated Background PDF Conversion Worker Process
+  pdf-worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: simplepdf_worker
+    restart: unless-stopped
+    command: ["node", "backend/dist/workers/index.js"]
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgrespassword@postgres:5432/simplepdf
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - WORKER_CONCURRENCY=4
+    volumes:
+      - shared_temp_storage:/app/temp_storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Production PostgreSQL Relational Store
+  postgres:
+    image: postgres:16-alpine
+    container_name: simplepdf_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: simplepdf
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./prisma/migrations/0_init/migration.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d simplepdf"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis In-Memory Queue & Rate Limiter Store
+  redis:
+    image: redis:7-alpine
+    container_name: simplepdf_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  pgdata:
+  redisdata:
+  shared_temp_storage:

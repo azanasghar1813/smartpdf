@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>SimplePDF Document Productivity &amp; Tools</title>
+    <link>https://simplepdf.me</link>
+    <description>Every PDF tool you need, 100% free and easy to use. High-speed, in-browser privacy.</description>
+    <language>en-US</language>
+    <lastBuildDate>Wed, 25 Nov 2026 15:12:33 GMT</lastBuildDate>
+    <atom:link href="https://simplepdf.me/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>How to Compress PDF Without Losing Quality (Email &amp; Web Ready)</title>
+      <link>https://simplepdf.me/blog/how-to-compress-pdf-without-losing-quality</link>
+      <guid>https://simplepdf.me/blog/how-to-compress-pdf-without-losing-quality</guid>
+      <pubDate>Mon, 18 Nov 2026 00:00:00 GMT</pubDate>
+      <description>Learn the optimal compression settings to reduce your PDF file size by up to 80% while keeping text and images sharp for email attachments.</description>
+    </item>
+    <item>
+      <title>How to Merge Multiple PDF Files on Any Device (100% Free)</title>
+      <link>https://simplepdf.me/blog/how-to-merge-multiple-pdf-files</link>
+      <guid>https://simplepdf.me/blog/how-to-merge-multiple-pdf-files</guid>
+      <pubDate>Mon, 18 Nov 2026 00:00:00 GMT</pubDate>
+      <description>A comprehensive step-by-step walkthrough on combining disparate PDF reports, invoices, and lecture slides into a single organized document.</description>
+    </item>
+    <item>
+      <title>How to Electronically Sign a PDF Online for Free (No Acrobat Needed)</title>
+      <link>https://simplepdf.me/blog/how-to-electronically-sign-pdf-online</link>
+      <guid>https://simplepdf.me/blog/how-to-electronically-sign-pdf-online</guid>
+      <pubDate>Mon, 18 Nov 2026 00:00:00 GMT</pubDate>
+      <description>Say goodbye to printing, signing by hand, and scanning. Create legally binding electronic signatures in seconds right from your browser.</description>
+    </item>
+    <item>
+      <title>How to Extract Text from PDF to Markdown for AI Workflows</title>
+      <link>https://simplepdf.me/blog/how-to-extract-pdf-to-markdown-for-ai</link>
+      <guid>https://simplepdf.me/blog/how-to-extract-pdf-to-markdown-for-ai</guid>
+      <pubDate>Mon, 18 Nov 2026 00:00:00 GMT</pubDate>
+      <description>Convert research papers, PDFs, and manuals into structured Markdown headings, tables, and lists ready for ChatGPT, Claude, and Gemini prompting.</description>
+    </item>
+  </channel>
+</rss>

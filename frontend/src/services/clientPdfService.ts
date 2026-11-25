@@ -482,6 +482,245 @@ export async function convertToPdfA(file: File): Promise<Uint8Array> {
 }
 
 /**
+ * Convert PDF to Microsoft Word (.docx) with 100% in-browser privacy & layout preservation
+ */
+export async function pdfToDocx(
+  file: File,
+  onProgress?: (progress: number, msg: string) => void
+): Promise<Blob> {
+  if (!window.pdfjsLib) {
+    for (let wait = 0; wait < 15; wait++) {
+      await new Promise((r) => setTimeout(r, 100));
+      if (window.pdfjsLib) break;
+    }
+  }
+
+  if (!window.pdfjsLib) {
+    throw new Error('PDF conversion engine is still loading. Please try again in a few moments.');
+  }
+
+  onProgress?.(10, 'Loading document into client memory...');
+  const arrayBuffer = await file.arrayBuffer();
+  const loadingTask = window.pdfjsLib.getDocument({ data: arrayBuffer });
+  const pdfDocument = await loadingTask.promise;
+  const numPages = pdfDocument.numPages;
+
+  const docParagraphs: { text: string; isHeading: boolean; isBullet: boolean }[] = [];
+  let totalExtractedItems = 0;
+
+  for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+    const pct = 15 + Math.round((pageNum / numPages) * 70);
+    onProgress?.(pct, `Analyzing layout and typography on page ${pageNum} of ${numPages}...`);
+
+    const page = await pdfDocument.getPage(pageNum);
+    const textContent = await page.getTextContent();
+    const items = (textContent.items || []) as any[];
+    totalExtractedItems += items.length;
+
+    if (items.length === 0) {
+      docParagraphs.push({
+        text: `[Page ${pageNum}: Scanned image or non-selectable vector page]`,
+        isHeading: false,
+        isBullet: false,
+      });
+      continue;
+    }
+
+    // Group items into horizontal lines based on Y coordinate
+    // PDF coordinates: origin at bottom-left, Y increases upwards
+    const lines: { y: number; height: number; items: any[] }[] = [];
+    const sortedItems = [...items].sort((a, b) => b.transform[5] - a.transform[5]);
+
+    for (const item of sortedItems) {
+      const itemY = item.transform[5];
+      const itemHeight = item.height || Math.abs(item.transform[3]) || 10;
+
+      let existingLine = lines.find((l) => Math.abs(l.y - itemY) <= Math.max(itemHeight * 0.45, 3));
+      if (!existingLine) {
+        existingLine = { y: itemY, height: itemHeight, items: [] };
+        lines.push(existingLine);
+      }
+      existingLine.items.push(item);
+    }
+
+    // Sort lines from top of page to bottom
+    lines.sort((a, b) => b.y - a.y);
+
+    for (const line of lines) {
+      // Sort items within line from left to right (X coordinate)
+      line.items.sort((a, b) => a.transform[4] - b.transform[4]);
+
+      let lineText = '';
+      for (let i = 0; i < line.items.length; i++) {
+        const cur = line.items[i];
+        if (i > 0) {
+          const prev = line.items[i - 1];
+          const prevEndX = prev.transform[4] + (prev.width || 0);
+          const curStartX = cur.transform[4];
+          if (curStartX - prevEndX > 2 && !lineText.endsWith(' ') && !cur.str.startsWith(' ')) {
+            lineText += ' ';
+          }
+        }
+        lineText += cur.str;
+      }
+
+      const cleanText = lineText.trim();
+      if (!cleanText) continue;
+
+      const isHeading =
+        line.height >= 14 ||
+        line.items.some((it) => it.fontName?.toLowerCase().includes('bold')) ||
+        (cleanText.length < 50 && cleanText === cleanText.toUpperCase() && /[A-Z]/.test(cleanText));
+      const isBullet = /^[\u2022\u25E6\u25AA\*\-\–\—]/.test(cleanText) || /^\d+\.\s/.test(cleanText);
+
+      docParagraphs.push({
+        text: cleanText,
+        isHeading,
+        isBullet,
+      });
+    }
+
+    if (pageNum < numPages) {
+      docParagraphs.push({
+        text: '--- PAGE BREAK ---',
+        isHeading: false,
+        isBullet: false,
+      });
+    }
+  }
+
+  if (totalExtractedItems === 0) {
+    docParagraphs.push({
+      text: 'SimplePDF Notice: This document appears to be a scanned image or photo without selectable text. Use the OCR PDF tool at https://simplepdf.me/ocr-pdf to convert scanned images to editable text.',
+      isHeading: false,
+      isBullet: false,
+    });
+  }
+
+  onProgress?.(90, 'Generating Microsoft Word (.docx) package...');
+
+  const zip = new JSZip();
+
+  // 1. [Content_Types].xml
+  zip.file(
+    '[Content_Types].xml',
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+  <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
+</Types>`
+  );
+
+  // 2. _rels/.rels
+  zip.folder('_rels')?.file(
+    '.rels',
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`
+  );
+
+  // 3. word/_rels/document.xml.rels
+  zip.folder('word')?.folder('_rels')?.file(
+    'document.xml.rels',
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`
+  );
+
+  // 4. word/styles.xml
+  zip.folder('word')?.file(
+    'styles.xml',
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:docDefaults>
+    <w:rPrDefault>
+      <w:rPr>
+        <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/>
+        <w:sz w:val="22"/>
+        <w:color w:val="1E293B"/>
+        <w:lang w:val="en-US"/>
+      </w:rPr>
+    </w:rPrDefault>
+    <w:pPrDefault>
+      <w:pPr>
+        <w:spacing w:after="120" w:line="276" w:lineRule="auto"/>
+      </w:pPr>
+    </w:pPrDefault>
+  </w:docDefaults>
+  <w:style w:type="paragraph" w:default="1" w:styleId="Normal">
+    <w:name w:val="Normal"/>
+    <w:qFormat/>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Heading1">
+    <w:name w:val="heading 1"/>
+    <w:basedOn w:val="Normal"/>
+    <w:qFormat/>
+    <w:pPr>
+      <w:spacing w:before="240" w:after="100"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/>
+      <w:b/>
+      <w:sz w:val="30"/>
+      <w:color w:val="0F172A"/>
+    </w:rPr>
+  </w:style>
+</w:styles>`
+  );
+
+  const escapeXml = (unsafe: string) =>
+    unsafe
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+
+  // 5. word/document.xml
+  let bodyXml = '';
+
+  for (const p of docParagraphs) {
+    if (p.text === '--- PAGE BREAK ---') {
+      bodyXml += `<w:p><w:r><w:br w:type="page"/></w:r></w:p>`;
+      continue;
+    }
+
+    if (p.isHeading) {
+      bodyXml += `<w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="28"/><w:color w:val="0F172A"/></w:rPr><w:t xml:space="preserve">${escapeXml(p.text)}</w:t></w:r></w:p>`;
+    } else if (p.isBullet) {
+      bodyXml += `<w:p><w:pPr><w:ind w:left="720" w:hanging="360"/><w:spacing w:after="80"/></w:pPr><w:r><w:rPr><w:sz w:val="22"/><w:color w:val="334155"/></w:rPr><w:t xml:space="preserve">${escapeXml(p.text)}</w:t></w:r></w:p>`;
+    } else {
+      bodyXml += `<w:p><w:pPr><w:spacing w:after="120" w:line="260" w:lineRule="auto"/></w:pPr><w:r><w:rPr><w:sz w:val="22"/><w:color w:val="334155"/></w:rPr><w:t xml:space="preserve">${escapeXml(p.text)}</w:t></w:r></w:p>`;
+    }
+  }
+
+  bodyXml += `<w:sectPr>
+    <w:pgSz w:w="11906" w:h="16838"/>
+    <w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="720" w:footer="720" w:gutter="0"/>
+  </w:sectPr>`;
+
+  zip.folder('word')?.file(
+    'document.xml',
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:body>
+    ${bodyXml}
+  </w:body>
+</w:document>`
+  );
+
+  onProgress?.(98, 'Finalizing Word file...');
+  return await zip.generateAsync({
+    type: 'blob',
+    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  });
+}
+
+/**
  * Helper to convert non-standard images via HTML5 Canvas
  */
 async function convertImageToEmbeddedPng(pdfDoc: any, file: File) {
@@ -508,3 +747,5 @@ async function convertImageToEmbeddedPng(pdfDoc: any, file: File) {
     img.src = url;
   });
 }
+
+

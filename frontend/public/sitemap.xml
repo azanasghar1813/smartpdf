@@ -1,256 +1,634 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://simplepdf.me/</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/"/>
   </url>
   <url>
     <loc>https://simplepdf.me/pricing</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/pricing"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/pricing"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/pricing"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/pricing"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/pricing"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/pricing"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/pricing"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/pricing"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/pricing"/>
   </url>
   <url>
     <loc>https://simplepdf.me/blog</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/blog"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/blog"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/blog"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/blog"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/blog"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/blog"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/blog"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/blog"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/blog"/>
   </url>
   <url>
     <loc>https://simplepdf.me/about</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/about"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/about"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/about"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/about"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/about"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/about"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/about"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/about"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/about"/>
   </url>
   <url>
     <loc>https://simplepdf.me/contact</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/contact"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/contact"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/contact"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/contact"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/contact"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/contact"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/contact"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/contact"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/contact"/>
   </url>
   <url>
     <loc>https://simplepdf.me/privacy</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/privacy"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/privacy"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/privacy"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/privacy"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/privacy"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/privacy"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/privacy"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/privacy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/privacy"/>
   </url>
   <url>
     <loc>https://simplepdf.me/terms</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/terms"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/terms"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/terms"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/terms"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/terms"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/terms"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/terms"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/terms"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/terms"/>
   </url>
   <url>
     <loc>https://simplepdf.me/security</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/security"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/security"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/security"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/security"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/security"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/security"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/security"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/security"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/security"/>
   </url>
   <url>
     <loc>https://simplepdf.me/cookies</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/cookies"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/cookies"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/cookies"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/cookies"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/cookies"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/cookies"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/cookies"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/cookies"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/cookies"/>
   </url>
   <url>
     <loc>https://simplepdf.me/faq</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/faq"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/faq"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/faq"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/faq"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/faq"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/faq"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/faq"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/faq"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/faq"/>
   </url>
   <url>
     <loc>https://simplepdf.me/merge-pdf</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/merge-pdf"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/merge-pdf"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/merge-pdf"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/merge-pdf"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/merge-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/merge-pdf"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/merge-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/merge-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/merge-pdf"/>
   </url>
   <url>
     <loc>https://simplepdf.me/split-pdf</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/split-pdf"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/split-pdf"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/split-pdf"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/split-pdf"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/split-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/split-pdf"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/split-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/split-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/split-pdf"/>
   </url>
   <url>
     <loc>https://simplepdf.me/remove-pages</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/remove-pages"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/remove-pages"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/remove-pages"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/remove-pages"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/remove-pages"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/remove-pages"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/remove-pages"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/remove-pages"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/remove-pages"/>
   </url>
   <url>
     <loc>https://simplepdf.me/extract-pages</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/extract-pages"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/extract-pages"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/extract-pages"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/extract-pages"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/extract-pages"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/extract-pages"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/extract-pages"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/extract-pages"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/extract-pages"/>
   </url>
   <url>
     <loc>https://simplepdf.me/organize-pdf</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/organize-pdf"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/organize-pdf"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/organize-pdf"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/organize-pdf"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/organize-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/organize-pdf"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/organize-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/organize-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/organize-pdf"/>
   </url>
   <url>
     <loc>https://simplepdf.me/compress-pdf</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/compress-pdf"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/compress-pdf"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/compress-pdf"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/compress-pdf"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/compress-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/compress-pdf"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/compress-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/compress-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/compress-pdf"/>
   </url>
   <url>
     <loc>https://simplepdf.me/repair-pdf</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/repair-pdf"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/repair-pdf"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/repair-pdf"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/repair-pdf"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/repair-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/repair-pdf"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/repair-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/repair-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/repair-pdf"/>
   </url>
   <url>
     <loc>https://simplepdf.me/ocr-pdf</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/ocr-pdf"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/ocr-pdf"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/ocr-pdf"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/ocr-pdf"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/ocr-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/ocr-pdf"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/ocr-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/ocr-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/ocr-pdf"/>
   </url>
   <url>
     <loc>https://simplepdf.me/jpg-to-pdf</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/jpg-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/jpg-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/jpg-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/jpg-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/jpg-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/jpg-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/jpg-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/jpg-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/jpg-to-pdf"/>
   </url>
   <url>
     <loc>https://simplepdf.me/word-to-pdf</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/word-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/word-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/word-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/word-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/word-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/word-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/word-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/word-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/word-to-pdf"/>
   </url>
   <url>
     <loc>https://simplepdf.me/powerpoint-to-pdf</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/powerpoint-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/powerpoint-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/powerpoint-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/powerpoint-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/powerpoint-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/powerpoint-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/powerpoint-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/powerpoint-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/powerpoint-to-pdf"/>
   </url>
   <url>
     <loc>https://simplepdf.me/excel-to-pdf</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/excel-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/excel-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/excel-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/excel-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/excel-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/excel-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/excel-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/excel-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/excel-to-pdf"/>
   </url>
   <url>
     <loc>https://simplepdf.me/html-to-pdf</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/html-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/html-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/html-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/html-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/html-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/html-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/html-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/html-to-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/html-to-pdf"/>
   </url>
   <url>
     <loc>https://simplepdf.me/pdf-to-jpg</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/pdf-to-jpg"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/pdf-to-jpg"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/pdf-to-jpg"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/pdf-to-jpg"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/pdf-to-jpg"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/pdf-to-jpg"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/pdf-to-jpg"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/pdf-to-jpg"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/pdf-to-jpg"/>
   </url>
   <url>
     <loc>https://simplepdf.me/pdf-to-word</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/pdf-to-word"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/pdf-to-word"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/pdf-to-word"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/pdf-to-word"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/pdf-to-word"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/pdf-to-word"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/pdf-to-word"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/pdf-to-word"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/pdf-to-word"/>
   </url>
   <url>
     <loc>https://simplepdf.me/pdf-to-powerpoint</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/pdf-to-powerpoint"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/pdf-to-powerpoint"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/pdf-to-powerpoint"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/pdf-to-powerpoint"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/pdf-to-powerpoint"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/pdf-to-powerpoint"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/pdf-to-powerpoint"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/pdf-to-powerpoint"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/pdf-to-powerpoint"/>
   </url>
   <url>
     <loc>https://simplepdf.me/pdf-to-excel</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/pdf-to-excel"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/pdf-to-excel"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/pdf-to-excel"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/pdf-to-excel"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/pdf-to-excel"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/pdf-to-excel"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/pdf-to-excel"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/pdf-to-excel"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/pdf-to-excel"/>
   </url>
   <url>
     <loc>https://simplepdf.me/pdf-to-pdfa</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/pdf-to-pdfa"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/pdf-to-pdfa"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/pdf-to-pdfa"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/pdf-to-pdfa"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/pdf-to-pdfa"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/pdf-to-pdfa"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/pdf-to-pdfa"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/pdf-to-pdfa"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/pdf-to-pdfa"/>
   </url>
   <url>
     <loc>https://simplepdf.me/pdf-to-markdown</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/pdf-to-markdown"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/pdf-to-markdown"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/pdf-to-markdown"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/pdf-to-markdown"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/pdf-to-markdown"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/pdf-to-markdown"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/pdf-to-markdown"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/pdf-to-markdown"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/pdf-to-markdown"/>
   </url>
   <url>
     <loc>https://simplepdf.me/rotate-pdf</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/rotate-pdf"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/rotate-pdf"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/rotate-pdf"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/rotate-pdf"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/rotate-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/rotate-pdf"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/rotate-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/rotate-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/rotate-pdf"/>
   </url>
   <url>
     <loc>https://simplepdf.me/add-page-numbers</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/add-page-numbers"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/add-page-numbers"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/add-page-numbers"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/add-page-numbers"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/add-page-numbers"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/add-page-numbers"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/add-page-numbers"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/add-page-numbers"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/add-page-numbers"/>
   </url>
   <url>
     <loc>https://simplepdf.me/add-watermark</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/add-watermark"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/add-watermark"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/add-watermark"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/add-watermark"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/add-watermark"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/add-watermark"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/add-watermark"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/add-watermark"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/add-watermark"/>
   </url>
   <url>
     <loc>https://simplepdf.me/crop-pdf</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/crop-pdf"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/crop-pdf"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/crop-pdf"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/crop-pdf"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/crop-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/crop-pdf"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/crop-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/crop-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/crop-pdf"/>
   </url>
   <url>
     <loc>https://simplepdf.me/edit-pdf</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/edit-pdf"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/edit-pdf"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/edit-pdf"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/edit-pdf"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/edit-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/edit-pdf"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/edit-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/edit-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/edit-pdf"/>
   </url>
   <url>
     <loc>https://simplepdf.me/protect-pdf</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/protect-pdf"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/protect-pdf"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/protect-pdf"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/protect-pdf"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/protect-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/protect-pdf"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/protect-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/protect-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/protect-pdf"/>
   </url>
   <url>
     <loc>https://simplepdf.me/unlock-pdf</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/unlock-pdf"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/unlock-pdf"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/unlock-pdf"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/unlock-pdf"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/unlock-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/unlock-pdf"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/unlock-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/unlock-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/unlock-pdf"/>
   </url>
   <url>
     <loc>https://simplepdf.me/sign-pdf</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/sign-pdf"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/sign-pdf"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/sign-pdf"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/sign-pdf"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/sign-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/sign-pdf"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/sign-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/sign-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/sign-pdf"/>
   </url>
   <url>
     <loc>https://simplepdf.me/redact-pdf</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/redact-pdf"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/redact-pdf"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/redact-pdf"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/redact-pdf"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/redact-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/redact-pdf"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/redact-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/redact-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/redact-pdf"/>
   </url>
   <url>
     <loc>https://simplepdf.me/ai-summarizer</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/ai-summarizer"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/ai-summarizer"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/ai-summarizer"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/ai-summarizer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/ai-summarizer"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/ai-summarizer"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/ai-summarizer"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/ai-summarizer"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/ai-summarizer"/>
   </url>
   <url>
     <loc>https://simplepdf.me/translate-pdf</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/translate-pdf"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/translate-pdf"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/translate-pdf"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/translate-pdf"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/translate-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/translate-pdf"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/translate-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/translate-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/translate-pdf"/>
   </url>
   <url>
     <loc>https://simplepdf.me/compare-pdf</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/compare-pdf"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/compare-pdf"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/compare-pdf"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/compare-pdf"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/compare-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/compare-pdf"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/compare-pdf"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/compare-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/compare-pdf"/>
   </url>
   <url>
     <loc>https://simplepdf.me/pdf-forms</loc>
-    <lastmod>2026-11-20</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simplepdf.me/pdf-forms"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://simplepdf.me/es/pdf-forms"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://simplepdf.me/pt/pdf-forms"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://simplepdf.me/de/pdf-forms"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://simplepdf.me/fr/pdf-forms"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://simplepdf.me/ar/pdf-forms"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://simplepdf.me/hi/pdf-forms"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://simplepdf.me/ur/pdf-forms"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simplepdf.me/pdf-forms"/>
   </url>
   <url>
     <loc>https://simplepdf.me/blog/how-to-compress-pdf-without-losing-quality</loc>

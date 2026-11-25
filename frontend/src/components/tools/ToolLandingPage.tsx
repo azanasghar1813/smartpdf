@@ -110,7 +110,7 @@ export const ToolLandingPage: React.FC<ToolLandingPageProps> = ({
           ) : tool.id === 'compare-pdf' ? (
             <ComparePdfWorkspace />
           ) : (
-            <ToolWorkspace tool={localizedTool} onNavigate={onNavigate} />
+            <ToolWorkspace key={tool.id} tool={localizedTool} onNavigate={onNavigate} />
           )}
         </section>
 
@@ -291,6 +291,25 @@ export const ToolLandingPage: React.FC<ToolLandingPageProps> = ({
                   </div>
                 );
               })}
+            </div>
+          </section>
+        )}
+
+        {/* 8.5 POPULAR SEARCHES & RANKED KEYWORDS */}
+        {tool.seoKeywords && tool.seoKeywords.length > 0 && (
+          <section aria-label="Popular Searches" className="bg-white rounded-3xl border border-slate-200 p-6 space-y-3 shadow-2xs">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              Popular Searches &amp; Topics
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {tool.seoKeywords.map((keyword, idx) => (
+                <span
+                  key={idx}
+                  className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-xs font-medium"
+                >
+                  {keyword}
+                </span>
+              ))}
             </div>
           </section>
         )}

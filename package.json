@@ -15,6 +15,7 @@
     "build:frontend": "npm run build --workspace=frontend && npm run build:seo",
     "build:backend": "npm run build --workspace=backend",
     "build:seo": "npx tsx scripts/generate-sitemaps.js && npx tsx scripts/generate-seo-pages.js",
+    "indexnow": "npx tsx scripts/submit-indexnow.js",
     "lint": "npm run lint --workspace=frontend",
     "test:audit": "node backend/test_controllers_deep.js",
     "test:secrets": "node scripts/audit-secrets.js",

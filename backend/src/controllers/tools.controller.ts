@@ -4,6 +4,7 @@ import path from 'path';
 import { jobService } from '../services/jobService';
 import { db } from '../services/dbService';
 import { LocalStorageProvider } from '../storage/storageProvider';
+import { cleanupQueue } from '../queues/cleanup.queue';
 import { config } from '../config/env';
 
 export async function createProcessingJob(req: Request, res: Response) {
@@ -169,4 +170,17 @@ export function getPlatformMetrics(req: Request, res: Response) {
     registeredUsersCount: metrics.registeredUsersCount,
     successRate: metrics.successRate,
   });
+}
+
+export async function purgeEphemeralStorage(req: Request, res: Response) {
+  try {
+    const result = await cleanupQueue.triggerCleanup();
+    return res.json({
+      success: true,
+      purgedCount: result.purgedCount,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to purge storage', message: err.message });
+  }
 }

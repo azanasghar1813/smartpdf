@@ -79,6 +79,7 @@ const AppContent: React.FC = () => {
           {currentTool ? (
             /* DEDICATED TOOL SEO LANDING PAGE WITH EMBEDDED WORKSPACE */
             <ToolLandingPage
+              key={currentTool.id}
               tool={currentTool}
               currentLang={lang}
               onNavigate={navigateTo}

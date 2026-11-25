@@ -255,6 +255,25 @@ function generateToolPageHtml(rawTool, langCode) {
           : ''
       }
 
+      ${
+        rawTool.seoKeywords && rawTool.seoKeywords.length > 0
+          ? `
+      <section aria-label="Popular Searches" class="bg-white rounded-3xl border border-slate-200 p-6 space-y-3">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Popular Searches &amp; Queries</h4>
+        <div class="flex flex-wrap gap-2">
+          ${rawTool.seoKeywords
+            .map(
+              (k) =>
+                `<span class="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-xs font-medium">${escapeHtml(
+                  k
+                )}</span>`
+            )
+            .join('')}
+        </div>
+      </section>`
+          : ''
+      }
+
       <section class="space-y-4 pt-4">
         <h3 class="text-lg font-bold text-slate-800">${escapeHtml(t.relatedToolsTitle)}</h3>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -278,7 +297,11 @@ function generateToolPageHtml(rawTool, langCode) {
 
   const headInjections = `
     <meta name="description" content="${escapeHtml(description)}" />
+    <meta name="keywords" content="${escapeHtml(rawTool.seoKeywords ? rawTool.seoKeywords.join(', ') : '')}" />
     <link rel="canonical" href="${canonicalUrl}" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="bingbot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 ${hreflangTags}
 ${xDefaultTag}
     <meta property="og:type" content="website" />
@@ -385,7 +408,11 @@ function generateBlogPostHtml(post) {
 
   const headInjections = `
     <meta name="description" content="${escapeHtml(description)}" />
+    <meta name="keywords" content="${escapeHtml(post.title)}, pdf tutorial, ${escapeHtml(post.category)}, free pdf tools, simplepdf" />
     <link rel="canonical" href="${canonicalUrl}" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="bingbot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta property="og:type" content="article" />
     <meta property="og:url" content="${canonicalUrl}" />
     <meta property="og:title" content="${escapeHtml(title)}" />
@@ -450,7 +477,11 @@ function generateFaqPageHtml() {
 
   const headInjections = `
     <meta name="description" content="${escapeHtml(description)}" />
+    <meta name="keywords" content="simplepdf faq, frequently asked questions, pdf tools support, pdf security, file retention" />
     <link rel="canonical" href="${canonicalUrl}" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="bingbot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="${canonicalUrl}" />
     <meta property="og:title" content="${escapeHtml(title)}" />
@@ -501,6 +532,517 @@ function generateNotFoundHtml() {
   return html;
 }
 
+// 5. Standard Public Static Page Helper
+function generatePublicPageHtml({ pagePath, title, description, breadcrumbName, bodyHtml }) {
+  const canonicalUrl = `${SITE_URL}${pagePath}`;
+
+  const webPageSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: title,
+    url: canonicalUrl,
+    description: description,
+    inLanguage: 'en',
+  };
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: breadcrumbName, item: canonicalUrl },
+    ],
+  };
+
+  let html = cleanBaseTemplate(baseTemplate);
+  html = html.replace(/<title>.*?<\/title>/i, `<title>${escapeHtml(title)}</title>`);
+
+  const headInjections = `
+    <meta name="description" content="${escapeHtml(description)}" />
+    <meta name="keywords" content="simplepdf, free online pdf tools, merge pdf, compress pdf, convert pdf, online pdf editor, pdf security" />
+    <link rel="canonical" href="${canonicalUrl}" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="bingbot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="${canonicalUrl}" />
+    <meta property="og:title" content="${escapeHtml(title)}" />
+    <meta property="og:description" content="${escapeHtml(description)}" />
+    <meta property="og:image" content="${SITE_URL}/logo.svg" />
+    <meta property="og:site_name" content="SimplePDF" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="${canonicalUrl}" />
+    <meta name="twitter:title" content="${escapeHtml(title)}" />
+    <meta name="twitter:description" content="${escapeHtml(description)}" />
+    <meta name="twitter:image" content="${SITE_URL}/logo.svg" />
+    <script type="application/ld+json" id="seo-json-ld">
+${JSON.stringify([webPageSchema, breadcrumbSchema], null, 2)}
+    </script>
+  </head>`;
+
+  html = html.replace(/<\/head>/i, headInjections);
+  html = html.replace(/<div id="root"[^>]*>([\s\S]*?)<\/div>/i, `<div id="root">${bodyHtml}</div>`);
+  return html;
+}
+
+// 6. Privacy Policy Prerender HTML
+function generatePrivacyPageHtml() {
+  const bodyHtml = `
+  <div class="py-16 bg-slate-50 min-h-screen" data-prerendered="true">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <div class="space-y-4">
+        <nav aria-label="Breadcrumb" class="text-xs font-semibold text-slate-500 flex items-center gap-2">
+          <a href="/" class="hover:text-brand-600">Home</a>
+          <span>/</span>
+          <span class="text-slate-900 font-bold">Privacy Policy</span>
+        </nav>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold">
+            Zero-Retention Architecture
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold">
+            GDPR &amp; CCPA Compliant
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold">
+            TLS 1.3 Encryption
+          </span>
+        </div>
+        <h1 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">Privacy Policy</h1>
+        <p class="text-slate-500 text-sm">
+          Effective Date: November 2026 • SimplePDF Platform (<a href="https://simplepdf.me" class="text-brand-600 hover:underline">https://simplepdf.me</a>)
+        </p>
+      </div>
+
+      <div class="bg-gradient-to-r from-emerald-500/10 via-brand-500/10 to-blue-500/10 border border-emerald-500/20 rounded-3xl p-6 sm:p-8 space-y-3">
+        <h2 class="text-emerald-800 font-bold text-base">Executive Privacy Commitment</h2>
+        <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+          At SimplePDF, we believe that everyday document tools should never compromise personal or corporate privacy.
+          Over 70% of our operations execute 100% in your local web browser using client-side WebAssembly—your files never reach any server.
+          For server-rendered conversions (such as OCR or Word conversion), files are automatically shredded and permanently unlinked within 60 minutes.
+          We do not sell, monetize, inspect, or feed your documents into artificial intelligence training sets.
+        </p>
+      </div>
+
+      <div class="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 space-y-8 text-sm text-slate-700 leading-relaxed shadow-soft">
+        <section class="space-y-3">
+          <h2 class="text-xl font-bold text-slate-900">1. Overview &amp; Data Controller Information</h2>
+          <p>This Privacy Policy explains how SimplePDF (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) protects your information. The data controller responsible for personal data under the EU GDPR is the SimplePDF Privacy Team (<code class="bg-slate-100 text-brand-600 px-2 py-0.5 rounded font-mono font-semibold">privacy@simplepdf.me</code>).</p>
+        </section>
+        <section class="space-y-3">
+          <h2 class="text-xl font-bold text-slate-900">2. In-Browser Client Execution (Edge Privacy)</h2>
+          <p>For client-side operations including Merge, Split, Rotate, Organize, Watermark, Page Numbers, Protect, Unlock, Sign, Crop, and Edit PDF, all document rendering, parsing, modification, and output generation take place entirely within your browser&apos;s sandboxed memory via compiled WebAssembly (WASM). Your files are never uploaded across the network.</p>
+        </section>
+        <section class="space-y-3">
+          <h2 class="text-xl font-bold text-slate-900">3. Ephemeral Storage &amp; Cryptographic Auto-Shredding</h2>
+          <p>Server-rendered conversions (OCR, Microsoft Office conversions, corrupted PDF repair) are protected in flight via TLS 1.3 256-bit encryption. Files are written to ephemeral volumes with non-deterministic UUIDv4 identifiers, and an automated background shredder daemon permanently unlinks and overwrites (DoD 5220.22-M zero-fill) files within 60 minutes or immediately upon download completion.</p>
+        </section>
+        <section class="space-y-3">
+          <h2 class="text-xl font-bold text-slate-900">4. Advertising &amp; Google AdSense Disclosures</h2>
+          <p>SimplePDF displays digital advertisements served by Google AdSense to fund free infrastructure. Google uses cookies (including the DoubleClick DART cookie) to serve ads based on user visits to this and other websites. Users may opt out of personalized advertising by visiting Google Ads Settings (<a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer" class="text-brand-600 underline">adssettings.google.com</a>) or www.aboutads.info.</p>
+        </section>
+        <section class="space-y-3">
+          <h2 class="text-xl font-bold text-slate-900">5. European GDPR User Rights (Articles 15-21)</h2>
+          <p>Under the EU and UK General Data Protection Regulation, individuals possess statutory rights including the Right of Access, Rectification, Erasure, Restriction of Processing, Data Portability, and Right to Object. Exercise your rights anytime by contacting <code class="bg-slate-100 text-brand-600 px-2 py-0.5 rounded font-mono font-semibold">privacy@simplepdf.me</code>.</p>
+        </section>
+        <section class="space-y-3">
+          <h2 class="text-xl font-bold text-slate-900">6. California Consumer Privacy Act (CCPA / CPRA)</h2>
+          <p>California residents have the right to know what personal information is collected, request deletion, and opt out of the sale or sharing of personal information. SimplePDF does not sell personal information or file data to data brokers or third parties.</p>
+        </section>
+      </div>
+    </div>
+  </div>`;
+
+  return generatePublicPageHtml({
+    pagePath: '/privacy',
+    title: 'Privacy Policy & Zero-Retention Data Protection | SimplePDF',
+    description: 'Learn how SimplePDF protects your documents with client-side WebAssembly, zero file retention, automatic shredding, and full GDPR/CCPA compliance.',
+    breadcrumbName: 'Privacy Policy',
+    bodyHtml,
+  });
+}
+
+// 7. Terms of Service Prerender HTML
+function generateTermsPageHtml() {
+  const bodyHtml = `
+  <div class="py-16 bg-slate-50 min-h-screen" data-prerendered="true">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <div class="space-y-4">
+        <nav aria-label="Breadcrumb" class="text-xs font-semibold text-slate-500 flex items-center gap-2">
+          <a href="/" class="hover:text-brand-600">Home</a>
+          <span>/</span>
+          <span class="text-slate-900 font-bold">Terms of Service</span>
+        </nav>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold">
+            100% Free Online Suite
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold">
+            100% User Document Ownership
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-xs font-bold">
+            Zero Document Licensing
+          </span>
+        </div>
+        <h1 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">Terms of Service</h1>
+        <p class="text-slate-500 text-sm">
+          Effective Date: November 2026 • SimplePDF Platform (<a href="https://simplepdf.me" class="text-brand-600 hover:underline">https://simplepdf.me</a>)
+        </p>
+      </div>
+
+      <div class="bg-gradient-to-r from-blue-500/10 via-brand-500/10 to-emerald-500/10 border border-blue-500/20 rounded-3xl p-6 sm:p-8 space-y-3">
+        <h2 class="text-blue-900 font-bold text-base">Plain-English Summary of Your Rights</h2>
+        <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+          Welcome to SimplePDF. All 32+ PDF editing, conversion, compression, and security tools are completely free without requiring an account, subscription, or credit card.
+          You retain 100% absolute ownership and copyright over all documents and files processed on SimplePDF.
+          We claim zero rights or license to your files, do not inspect their contents, and never feed your data into AI models.
+        </p>
+      </div>
+
+      <div class="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 space-y-8 text-sm text-slate-700 leading-relaxed shadow-soft">
+        <section class="space-y-3">
+          <h2 class="text-xl font-bold text-slate-900">1. Acceptance of Terms &amp; Eligibility</h2>
+          <p>By accessing or using SimplePDF, you agree to be bound by these Terms and our Privacy Policy. You must be at least 13 years of age to use the service.</p>
+        </section>
+        <section class="space-y-3">
+          <h2 class="text-xl font-bold text-slate-900">2. Free Service Model &amp; No Registration Mandate</h2>
+          <p>All core productivity workflows are accessible without subscription paywalls, registration, or credit card information.</p>
+        </section>
+        <section class="space-y-3">
+          <h2 class="text-xl font-bold text-slate-900">3. Document Ownership &amp; Absolute Zero-License Guarantee</h2>
+          <p>You retain 100% sole ownership, title, copyright, and intellectual property rights to all documents processed on SimplePDF. SimplePDF claims zero license, zero rights, and never utilizes user documents for machine learning training.</p>
+        </section>
+        <section class="space-y-3">
+          <h2 class="text-xl font-bold text-slate-900">4. Acceptable Use Policy (AUP)</h2>
+          <p>Users must not upload malware, viruses, CSAM, or illegal materials, violate third-party intellectual property, or employ high-frequency bot scrapers that overwhelm server capacity.</p>
+        </section>
+        <section class="space-y-3">
+          <h2 class="text-xl font-bold text-slate-900">5. Disclaimer of Warranties &amp; Limitation of Liability</h2>
+          <p>The platform is provided on an &quot;as is&quot; and &quot;as available&quot; basis without warranties of any kind. SimplePDF disclaims all liability for indirect or consequential damages, and total liability shall not exceed fifty US dollars ($50.00 USD).</p>
+        </section>
+        <section class="space-y-3">
+          <h2 class="text-xl font-bold text-slate-900">6. Legal &amp; Abuse Contact</h2>
+          <p>For legal inquiries, contact <code class="bg-slate-100 text-brand-600 px-2 py-0.5 rounded font-mono font-semibold">legal@simplepdf.me</code>. For abuse or copyright notifications, email <code class="bg-slate-100 text-brand-600 px-2 py-0.5 rounded font-mono font-semibold">abuse@simplepdf.me</code>.</p>
+        </section>
+      </div>
+    </div>
+  </div>`;
+
+  return generatePublicPageHtml({
+    pagePath: '/terms',
+    title: 'Terms of Service & Document Ownership Agreement | SimplePDF',
+    description: 'Read the SimplePDF Terms of Service. 100% free online PDF suite, zero document licensing, full user copyright ownership, and acceptable use terms.',
+    breadcrumbName: 'Terms of Service',
+    bodyHtml,
+  });
+}
+
+// 8. Cookie Policy Prerender HTML
+function generateCookiesPageHtml() {
+  const bodyHtml = `
+  <div class="py-16 bg-slate-50 min-h-screen" data-prerendered="true">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <div class="space-y-4">
+        <nav aria-label="Breadcrumb" class="text-xs font-semibold text-slate-500 flex items-center gap-2">
+          <a href="/" class="hover:text-brand-600">Home</a>
+          <span>/</span>
+          <span class="text-slate-900 font-bold">Cookie Policy</span>
+        </nav>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold">
+            Cookie &amp; Storage Transparency
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold">
+            ePrivacy Directive &amp; GDPR Compliant
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold">
+            CCPA / CPRA Ready
+          </span>
+        </div>
+        <h1 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">Cookie Policy</h1>
+        <p class="text-slate-500 text-sm">
+          Effective Date: November 2026 • SimplePDF Platform (<a href="https://simplepdf.me" class="text-brand-600 hover:underline">https://simplepdf.me</a>)
+        </p>
+      </div>
+
+      <div class="bg-gradient-to-r from-amber-500/10 via-brand-500/10 to-blue-500/10 border border-amber-500/20 rounded-3xl p-6 sm:p-8 space-y-3">
+        <h2 class="text-amber-900 font-bold text-base">Zero Document Tracking Commitment</h2>
+        <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+          At SimplePDF, we believe that transparency is paramount.
+          We use minimal cookies and local device storage strictly to remember your interface preferences (such as selected language and theme), ensure infrastructure security, measure anonymized traffic velocity, and deliver non-intrusive digital advertisements to keep our 32+ tools 100% free for everyone.
+          Your PDF files, document text, and uploaded data are NEVER tracked, indexed, or stored in cookies.
+        </p>
+      </div>
+
+      <div class="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 space-y-8 text-sm text-slate-700 leading-relaxed shadow-soft">
+        <section class="space-y-3">
+          <h2 class="text-xl font-bold text-slate-900">1. Comprehensive Cookie &amp; Storage Inventory</h2>
+          <div class="overflow-x-auto border border-slate-200 rounded-2xl">
+            <table class="w-full text-left text-xs text-slate-600">
+              <thead class="bg-slate-50 text-slate-800 font-bold border-b border-slate-200 uppercase text-[11px]">
+                <tr>
+                  <th class="py-2.5 px-3">Identifier</th>
+                  <th class="py-2.5 px-3">Category</th>
+                  <th class="py-2.5 px-3">Purpose</th>
+                  <th class="py-2.5 px-3">Storage Type</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr><td class="py-2.5 px-3 font-mono font-bold">simplepdf_lang</td><td class="py-2.5 px-3">Functional</td><td class="py-2.5 px-3">Stores UI language choice</td><td class="py-2.5 px-3">LocalStorage</td></tr>
+                <tr><td class="py-2.5 px-3 font-mono font-bold">simplepdf_history</td><td class="py-2.5 px-3">Functional</td><td class="py-2.5 px-3">Recent task history stored on client device only</td><td class="py-2.5 px-3">LocalStorage</td></tr>
+                <tr><td class="py-2.5 px-3 font-mono font-bold">cf_clearance / __cf_bm</td><td class="py-2.5 px-3">Security</td><td class="py-2.5 px-3">Cloudflare bot mitigation and anti-DDoS</td><td class="py-2.5 px-3">HTTP Cookie</td></tr>
+                <tr><td class="py-2.5 px-3 font-mono font-bold">_ga / _ga_*</td><td class="py-2.5 px-3">Analytics</td><td class="py-2.5 px-3">Google Analytics 4 anonymized aggregated telemetry</td><td class="py-2.5 px-3">HTTP Cookie</td></tr>
+                <tr><td class="py-2.5 px-3 font-mono font-bold">__gads / __gpi / IDE</td><td class="py-2.5 px-3">Advertising</td><td class="py-2.5 px-3">Google AdSense ad delivery and frequency capping</td><td class="py-2.5 px-3">HTTP Cookie</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="space-y-3">
+          <h2 class="text-xl font-bold text-slate-900">2. How to Control &amp; Opt Out of Cookies</h2>
+          <p>You can manage, block, or delete cookies directly in your browser settings (Google Chrome, Firefox, Safari, Microsoft Edge). Furthermore, opt out of third-party advertising cookies via the Digital Advertising Alliance (<a href="https://optout.aboutads.info" target="_blank" rel="noopener noreferrer" class="text-brand-600 underline">optout.aboutads.info</a>) or European Interactive Digital Advertising Alliance (<a href="https://www.youronlinechoices.eu" target="_blank" rel="noopener noreferrer" class="text-brand-600 underline">youronlinechoices.eu</a>).</p>
+        </section>
+
+        <section class="space-y-3">
+          <h2 class="text-xl font-bold text-slate-900">3. Privacy Contact</h2>
+          <p>Have questions regarding our cookie practices? Contact our Data Protection Officer at: <code class="bg-slate-100 text-brand-600 px-2 py-0.5 rounded font-mono font-semibold">privacy@simplepdf.me</code>.</p>
+        </section>
+      </div>
+    </div>
+  </div>`;
+
+  return generatePublicPageHtml({
+    pagePath: '/cookies',
+    title: 'Cookie Policy & Local Storage Transparency | SimplePDF',
+    description: 'Discover how SimplePDF uses minimal cookies and local storage for interface preferences and AdSense ads. Learn how to manage or disable cookies.',
+    breadcrumbName: 'Cookie Policy',
+    bodyHtml,
+  });
+}
+
+// 9. Pricing Page Prerender HTML
+function generatePricingPageHtml() {
+  const bodyHtml = `
+  <div class="py-16 bg-slate-50 min-h-screen" data-prerendered="true">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <div class="text-center space-y-4 max-w-2xl mx-auto">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold">
+          100% Free Forever
+        </span>
+        <h1 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">SimplePDF Pricing — 100% Free Online PDF Tools</h1>
+        <p class="text-slate-600 text-sm sm:text-base">All 32+ PDF editing, conversion, compression, and security tools are completely free to use with zero registration or payment required.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div class="bg-white rounded-3xl border-2 border-brand-500 p-8 shadow-soft space-y-6">
+          <div class="space-y-2">
+            <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold">100% Free Forever</span>
+            <h2 class="text-2xl font-black text-slate-900">Free Tier</h2>
+            <div class="text-3xl font-black text-slate-900">$0 <span class="text-sm font-medium text-slate-500">/ forever</span></div>
+            <p class="text-xs text-slate-600">Zero cost, no credit card, no account required. Access all 32+ tools directly in your browser.</p>
+          </div>
+          <ul class="space-y-2.5 text-xs text-slate-700">
+            <li>✓ All 32+ PDF Tools (Merge, Split, OCR, Compress, Convert)</li>
+            <li>✓ Up to 50MB per file allowance</li>
+            <li>✓ In-Browser WebAssembly Edge Processing with Zero Retention</li>
+            <li>✓ Instant conversions without sign-up</li>
+            <li>✓ Mobile, tablet &amp; desktop browser support</li>
+          </ul>
+          <a href="/#tools" class="block w-full text-center py-3 rounded-xl bg-brand-600 text-white font-bold text-sm shadow-xs">Explore All 32 Tools Free</a>
+        </div>
+        <div class="bg-white rounded-3xl border border-slate-200 p-8 shadow-soft space-y-6">
+          <div class="space-y-2">
+            <span class="px-3 py-1 rounded-full bg-brand-50 text-brand-700 text-xs font-extrabold">Pro Tier</span>
+            <h2 class="text-2xl font-black text-slate-900">Pro Power</h2>
+            <div class="text-3xl font-black text-slate-900">$4.99 <span class="text-sm font-medium text-slate-500">/ month</span></div>
+            <p class="text-xs text-slate-600">For high-volume business workflows, large batch archives, and ad-free productivity.</p>
+          </div>
+          <ul class="space-y-2.5 text-xs text-slate-700">
+            <li>✓ Everything in Free Plan</li>
+            <li>✓ Up to 200MB file size allowance</li>
+            <li>✓ Unlimited batch processing queue</li>
+            <li>✓ Priority high-speed cloud OCR clusters</li>
+            <li>✓ 100% Ad-Free clean interface</li>
+          </ul>
+          <a href="/#tools" class="block w-full text-center py-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-sm hover:bg-slate-200">Start Free</a>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  return generatePublicPageHtml({
+    pagePath: '/pricing',
+    title: 'SimplePDF Pricing — 100% Free Unlimited Online PDF Tools',
+    description: 'SimplePDF is 100% free with no credit card required. Explore 32+ fast in-browser and cloud PDF tools with zero file retention and instant processing.',
+    breadcrumbName: 'Pricing',
+    bodyHtml,
+  });
+}
+
+// 10. Security Architecture Prerender HTML
+function generateSecurityPageHtml() {
+  const bodyHtml = `
+  <div class="py-16 bg-slate-50 min-h-screen" data-prerendered="true">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <div class="space-y-4">
+        <nav aria-label="Breadcrumb" class="text-xs font-semibold text-slate-500 flex items-center gap-2">
+          <a href="/" class="hover:text-brand-600">Home</a>
+          <span>/</span>
+          <span class="text-slate-900 font-bold">Security Architecture</span>
+        </nav>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold">
+          Document Protection Architecture
+        </span>
+        <h1 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">Security &amp; Data Protection Architecture</h1>
+        <p class="text-slate-500 text-sm">Detailed technical overview of encryption protocols, ephemeral storage, and client-side processing.</p>
+      </div>
+      <div class="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 space-y-8 text-sm text-slate-700 leading-relaxed shadow-soft">
+        <section class="space-y-3">
+          <h2 class="text-xl font-bold text-slate-900">1. Client-Side WebAssembly Processing (Edge Privacy)</h2>
+          <p>SimplePDF executes document parsing, page manipulation, rotation, merging, and cryptographic signing inside your browser sandbox using compiled WebAssembly. Files never traverse public network connections for client-side operations.</p>
+        </section>
+        <section class="space-y-3">
+          <h2 class="text-xl font-bold text-slate-900">2. Ephemeral Storage with Automated Cryptographic Shredding</h2>
+          <p>When server-side processing is necessary (OCR text recognition, complex Office document conversions), files are assigned non-deterministic UUIDv4 tokens. Background shredder daemons permanently zero-fill and delete files within 60 minutes or instantly following download completion.</p>
+        </section>
+        <section class="space-y-3">
+          <h2 class="text-xl font-bold text-slate-900">3. End-to-End Transport Layer Security (TLS 1.3 256-Bit)</h2>
+          <p>All network traffic is encrypted via TLS 1.3 with 256-bit keys, ensuring protection against eavesdropping or man-in-the-middle attacks.</p>
+        </section>
+      </div>
+    </div>
+  </div>`;
+
+  return generatePublicPageHtml({
+    pagePath: '/security',
+    title: 'Security & Document Protection Architecture | SimplePDF',
+    description: 'Explore the SimplePDF security architecture: client-side WebAssembly edge processing, TLS 1.3 encryption, and automated cryptographic shredding.',
+    breadcrumbName: 'Security',
+    bodyHtml,
+  });
+}
+
+// 11. About Us Prerender HTML
+function generateAboutPageHtml() {
+  const bodyHtml = `
+  <div class="py-16 bg-slate-50 min-h-screen" data-prerendered="true">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <div class="text-center space-y-4">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-brand-700 text-xs font-bold">
+          Our Mission &amp; Story
+        </span>
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">Document Productivity. Made Simple.</h1>
+        <p class="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">SimplePDF was created to solve everyday document frustration. We believe essential productivity tools should be fast, elegant, and uncompromisingly private.</p>
+      </div>
+      <div class="bg-white rounded-3xl border border-slate-200 p-8 sm:p-10 space-y-8 shadow-soft text-sm text-slate-700 leading-relaxed">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+          <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
+            <h3 class="font-bold text-slate-900">Zero Server Lag</h3>
+            <p class="text-xs text-slate-500">Core operations process directly inside your browser via WebAssembly.</p>
+          </div>
+          <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
+            <h3 class="font-bold text-slate-900">Guaranteed Privacy</h3>
+            <p class="text-xs text-slate-500">Zero retention. No file hoarding. Ephemeral automatic shredding.</p>
+          </div>
+          <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
+            <h3 class="font-bold text-slate-900">Global Accessibility</h3>
+            <p class="text-xs text-slate-500">Free access for students, teachers, freelancers, and businesses worldwide.</p>
+          </div>
+        </div>
+        <p>Millions of people deal with PDF documents every day: compiling resumes, signing agreements, merging study notes, or shrinking file sizes for email. Yet traditional software is expensive, slow, and bloated. We re-engineered the PDF suite from the ground up: combining instant client-side execution for everyday privacy with high-speed cloud clusters for deep document conversions.</p>
+      </div>
+    </div>
+  </div>`;
+
+  return generatePublicPageHtml({
+    pagePath: '/about',
+    title: 'About SimplePDF — Document Productivity Made Simple',
+    description: 'Discover the story behind SimplePDF: fast, elegant, and uncompromisingly private document productivity tools powered by WebAssembly.',
+    breadcrumbName: 'About Us',
+    bodyHtml,
+  });
+}
+
+// 12. Contact Us Prerender HTML
+function generateContactPageHtml() {
+  const bodyHtml = `
+  <div class="py-16 bg-slate-50 min-h-screen" data-prerendered="true">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <div class="text-center space-y-3">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-brand-700 text-xs font-bold">
+          Support &amp; Inquiries
+        </span>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Contact Us</h1>
+        <p class="text-slate-600 text-sm max-w-md mx-auto">Have questions, feedback, or enterprise partnership inquiries? We would love to hear from you.</p>
+      </div>
+      <div class="bg-white rounded-3xl border border-slate-200 p-8 sm:p-10 shadow-soft space-y-6 text-sm text-slate-700">
+        <p>Our dedicated support and engineering teams are ready to help with any inquiries, technical questions, bug reports, or feature recommendations.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+            <h4 class="font-bold text-slate-900 text-xs">Customer Support &amp; Feedback</h4>
+            <p class="text-xs text-brand-600 font-mono font-semibold">support@simplepdf.me</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+            <h4 class="font-bold text-slate-900 text-xs">Privacy &amp; Data Protection Officer</h4>
+            <p class="text-xs text-brand-600 font-mono font-semibold">privacy@simplepdf.me</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  return generatePublicPageHtml({
+    pagePath: '/contact',
+    title: 'Contact SimplePDF — Support & Inquiries',
+    description: 'Get in touch with the SimplePDF team for customer support, bug reports, feature requests, or enterprise partnership inquiries.',
+    breadcrumbName: 'Contact Us',
+    bodyHtml,
+  });
+}
+
+// 13. Blog Index Prerender HTML
+function generateBlogIndexHtml() {
+  const bodyHtml = `
+  <div class="py-16 bg-slate-50 min-h-screen" data-prerendered="true">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <div class="text-center max-w-2xl mx-auto space-y-3">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-brand-700 text-xs font-bold">
+          Knowledge Base &amp; Guides
+        </span>
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">SimplePDF Blog</h1>
+        <p class="text-slate-600 text-sm sm:text-base">In-depth tutorials, workflow guides, and productivity tips for PDF editing, compression, OCR, and document privacy.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        ${BLOG_POSTS.map(
+          (post) => `
+        <article class="bg-white rounded-3xl border border-slate-200 p-8 shadow-soft flex flex-col justify-between">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">${escapeHtml(post.category)}</span>
+              <span class="text-slate-400">${escapeHtml(post.readTime)}</span>
+            </div>
+            <h2 class="text-xl font-extrabold text-slate-900 leading-snug">
+              <a href="/blog/${post.slug}" class="hover:text-brand-600">${escapeHtml(post.title)}</a>
+            </h2>
+            <p class="text-slate-500 text-xs sm:text-sm leading-relaxed">${escapeHtml(post.excerpt)}</p>
+          </div>
+          <div class="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-xs text-slate-400">${escapeHtml(post.publishedDate)}</span>
+            <a href="/blog/${post.slug}" class="text-xs font-bold text-brand-600 hover:text-brand-700">Read Article →</a>
+          </div>
+        </article>`
+        ).join('')}
+      </div>
+    </div>
+  </div>`;
+
+  return generatePublicPageHtml({
+    pagePath: '/blog',
+    title: 'SimplePDF Blog — PDF Tutorials, Guides & Document Tips',
+    description: 'Explore in-depth tutorials, workflow guides, and productivity tips for PDF editing, compression, OCR, and document privacy.',
+    breadcrumbName: 'Blog',
+    bodyHtml,
+  });
+}
+
 // A. Generate All Tool Pages (32 tools × 8 languages = 256 files)
 for (const tool of ALL_TOOLS) {
   for (const lang of publishedLangs) {
@@ -542,8 +1084,40 @@ totalGenerated++;
 fs.writeFileSync(path.join(DIST_DIR, '404.html'), generateNotFoundHtml(), 'utf-8');
 totalGenerated++;
 
+// E. Generate Static Public & Legal Pages (/privacy, /terms, /cookies, /pricing, /about, /contact, /security, /blog)
+const publicPages = [
+  { dir: 'privacy', generator: generatePrivacyPageHtml },
+  { dir: 'terms', generator: generateTermsPageHtml },
+  { dir: 'cookies', generator: generateCookiesPageHtml },
+  { dir: 'pricing', generator: generatePricingPageHtml },
+  { dir: 'about', generator: generateAboutPageHtml },
+  { dir: 'contact', generator: generateContactPageHtml },
+  { dir: 'security', generator: generateSecurityPageHtml },
+  { dir: 'blog', generator: generateBlogIndexHtml },
+];
+
+for (const { dir, generator } of publicPages) {
+  const targetDir = path.join(DIST_DIR, dir);
+  if (!fs.existsSync(targetDir)) {
+    fs.mkdirSync(targetDir, { recursive: true });
+  }
+  fs.writeFileSync(path.join(targetDir, 'index.html'), generator(), 'utf-8');
+  totalGenerated++;
+}
+
+// F. Sync Crawler Assets (llms.txt, IndexNow key, rss.xml) to dist
+const crawlerFiles = ['llms.txt', 'rss.xml', '8f4b23829c914e6dae76c338421b8c2d.txt'];
+for (const cf of crawlerFiles) {
+  const src = path.resolve(__dirname, '../frontend/public', cf);
+  const dest = path.join(DIST_DIR, cf);
+  if (fs.existsSync(src)) {
+    fs.copyFileSync(src, dest);
+  }
+}
+
 console.log(`\n✅ Generated ${totalGenerated} fully prerendered static HTML files into frontend/dist/!`);
 console.log(`   - 256 Multilingual Tool Pages (all 32 tools)`);
-console.log(`   - ${BLOG_POSTS.length} Blog Post Pages`);
+console.log(`   - ${BLOG_POSTS.length} Dedicated Blog Post Pages`);
+console.log(`   - 8 Public & Legal Pages (/privacy, /terms, /cookies, /pricing, /about, /contact, /security, /blog)`);
 console.log(`   - /faq with FAQPage JSON-LD schema`);
 console.log(`   - Custom 404.html error page`);

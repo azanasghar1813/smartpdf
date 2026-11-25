@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import zlib from 'zlib';
 import JSZip from 'jszip';
 import { getPdfLib } from './pdfLibLoader';
 
@@ -423,6 +424,7 @@ export class ConversionService {
   <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
   <Default Extension="xml" ContentType="application/xml"/>
   <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+  <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
 </Types>`
     );
 
@@ -435,12 +437,72 @@ export class ConversionService {
 </Relationships>`
     );
 
-    // 3. word/document.xml
+    // 3. word/_rels/document.xml.rels
+    zip.folder('word')?.folder('_rels')?.file(
+      'document.xml.rels',
+      `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`
+    );
+
+    // 4. word/styles.xml
+    zip.folder('word')?.file(
+      'styles.xml',
+      `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:docDefaults>
+    <w:rPrDefault>
+      <w:rPr>
+        <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/>
+        <w:sz w:val="22"/>
+        <w:color w:val="1E293B"/>
+        <w:lang w:val="en-US"/>
+      </w:rPr>
+    </w:rPrDefault>
+    <w:pPrDefault>
+      <w:pPr>
+        <w:spacing w:after="120" w:line="276" w:lineRule="auto"/>
+      </w:pPr>
+    </w:pPrDefault>
+  </w:docDefaults>
+  <w:style w:type="paragraph" w:default="1" w:styleId="Normal">
+    <w:name w:val="Normal"/>
+    <w:qFormat/>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Heading1">
+    <w:name w:val="heading 1"/>
+    <w:basedOn w:val="Normal"/>
+    <w:qFormat/>
+    <w:pPr>
+      <w:spacing w:before="240" w:after="100"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/>
+      <w:b/>
+      <w:sz w:val="30"/>
+      <w:color w:val="0F172A"/>
+    </w:rPr>
+  </w:style>
+</w:styles>`
+    );
+
+    // 5. word/document.xml
     const paragraphsXml = textLines
-      .map(
-        (line) =>
-          `<w:p><w:r><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/><w:sz w:val="22"/></w:rPr><w:t>${this.escapeXml(line)}</w:t></w:r></w:p>`
-      )
+      .map((line) => {
+        const isHeading =
+          (line.length < 50 && line === line.toUpperCase() && /[A-Z]/.test(line)) ||
+          /^(EXPERIENCE|EDUCATION|SKILLS|PROJECTS|PROFILE|SUMMARY|CERTIFICATIONS|WORK HISTORY|CONTACT)/i.test(line);
+        const isBullet = /^[\u2022\u25E6\u25AA\*\-\–]/.test(line);
+
+        if (isHeading) {
+          return `<w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="28"/><w:color w:val="0F172A"/></w:rPr><w:t xml:space="preserve">${this.escapeXml(line)}</w:t></w:r></w:p>`;
+        } else if (isBullet) {
+          return `<w:p><w:pPr><w:ind w:left="720" w:hanging="360"/><w:spacing w:after="80"/></w:pPr><w:r><w:rPr><w:sz w:val="22"/><w:color w:val="334155"/></w:rPr><w:t xml:space="preserve">${this.escapeXml(line)}</w:t></w:r></w:p>`;
+        } else {
+          return `<w:p><w:pPr><w:spacing w:after="120" w:line="260" w:lineRule="auto"/></w:pPr><w:r><w:rPr><w:sz w:val="22"/><w:color w:val="334155"/></w:rPr><w:t xml:space="preserve">${this.escapeXml(line)}</w:t></w:r></w:p>`;
+        }
+      })
       .join('');
 
     zip.folder('word')?.file(
@@ -448,11 +510,11 @@ export class ConversionService {
       `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
   <w:body>
-    <w:p>
-      <w:pPr><w:jc w:val="left"/></w:pPr>
-      <w:r><w:rPr><w:b/><w:sz w:val="32"/><w:color w:val="E11D48"/></w:rPr><w:t>${this.escapeXml(baseName)}</w:t></w:r>
-    </w:p>
     ${paragraphsXml}
+    <w:sectPr>
+      <w:pgSz w:w="11906" w:h="16838"/>
+      <w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="720" w:footer="720" w:gutter="0"/>
+    </w:sectPr>
   </w:body>
 </w:document>`
     );
@@ -814,34 +876,206 @@ export class ConversionService {
     };
   }
 
-  // Helper: extract raw strings from PDF binary stream
+  // Helper: extract genuine decoded text lines from PDF by decompressing streams and interpreting font CMaps
   private extractTextFromPdfBuffer(buffer: Buffer): string[] {
-    const raw = buffer.toString('latin1');
-    const strings: string[] = [];
+    const content = buffer.toString('binary');
+    const streams: { uncompressed: string; objNum?: number }[] = [];
+    const fontToUnicodeMap = new Map<string, Map<string, string>>();
+    const objToCmapMap = new Map<number, Map<string, string>>();
 
-    // Match text inside BT (Begin Text) ... ET (End Text) blocks or parenthesized strings
-    const parenMatches = raw.match(/\(([^()]{3,120})\)\s*Tj/g) || [];
-    for (const m of parenMatches) {
-      const match = m.match(/\(([^()]+)\)/);
-      if (match && match[1]) {
-        const cleaned = match[1].replace(/\\[nrtbf\\()]/g, ' ').trim();
-        if (cleaned.length > 2 && !strings.includes(cleaned)) {
-          strings.push(cleaned);
+    // 1. Locate all indirect objects and decompress all streams
+    let p = 0;
+    while (true) {
+      const sStart = content.indexOf('stream', p);
+      if (sStart === -1) break;
+
+      // Find enclosing object ID before stream
+      const objHeaderMatch = content.slice(Math.max(0, sStart - 200), sStart).match(/(\d+)\s+(\d+)\s+obj/g);
+      let objNum: number | undefined;
+      if (objHeaderMatch && objHeaderMatch.length > 0) {
+        const lastHeader = objHeaderMatch[objHeaderMatch.length - 1];
+        const numMatch = lastHeader.match(/(\d+)\s+(\d+)\s+obj/);
+        if (numMatch) objNum = parseInt(numMatch[1], 10);
+      }
+
+      let dataStart = sStart + 6;
+      if (content[dataStart] === '\r') dataStart++;
+      if (content[dataStart] === '\n') dataStart++;
+      const sEnd = content.indexOf('endstream', dataStart);
+      if (sEnd === -1) break;
+
+      let dataEnd = sEnd;
+      if (content[dataEnd - 1] === '\n') dataEnd--;
+      if (content[dataEnd - 1] === '\r') dataEnd--;
+
+      const sliceBuf = buffer.subarray(dataStart, dataEnd);
+      let decompressed = '';
+      try {
+        decompressed = zlib.unzipSync(sliceBuf).toString('latin1');
+      } catch {
+        try {
+          decompressed = zlib.inflateRawSync(sliceBuf).toString('latin1');
+        } catch {
+          // If not compressed, read plain
+          decompressed = sliceBuf.toString('latin1');
+        }
+      }
+
+      if (decompressed) {
+        streams.push({ uncompressed: decompressed, objNum });
+
+        // If this stream is a CMap, parse its character mappings
+        if (decompressed.includes('begincmap')) {
+          const cmap = new Map<string, string>();
+
+          // Parse bfchar: <0003> <0020>
+          const bfcharMatches = decompressed.match(/<([0-9a-fA-F]+)>\s*<([0-9a-fA-F]+)>/g) || [];
+          for (const m of bfcharMatches) {
+            const parts = m.match(/<([0-9a-fA-F]+)>\s*<([0-9a-fA-F]+)>/);
+            if (parts) {
+              const charCode = parseInt(parts[2], 16);
+              cmap.set(parts[1].toUpperCase(), String.fromCodePoint(charCode));
+            }
+          }
+
+          // Parse bfrange: <0001> <0005> <0020> or <0001> <0005> [<0020> ...]
+          const bfrangeMatches = decompressed.match(/<([0-9a-fA-F]+)>\s*<([0-9a-fA-F]+)>\s*<([0-9a-fA-F]+)>/g) || [];
+          for (const m of bfrangeMatches) {
+            const parts = m.match(/<([0-9a-fA-F]+)>\s*<([0-9a-fA-F]+)>\s*<([0-9a-fA-F]+)>/);
+            if (parts) {
+              const start = parseInt(parts[1], 16);
+              const end = parseInt(parts[2], 16);
+              let target = parseInt(parts[3], 16);
+              for (let code = start; code <= end; code++, target++) {
+                const hex = code.toString(16).toUpperCase().padStart(4, '0');
+                cmap.set(hex, String.fromCodePoint(target));
+              }
+            }
+          }
+
+          if (objNum !== undefined) {
+            objToCmapMap.set(objNum, cmap);
+          }
+        }
+      }
+
+      p = sEnd + 9;
+    }
+
+    // 2. Locate /Font and /ToUnicode references to map /F1, /F2, etc. to their exact CMaps
+    const fontObjRegex = /(\d+)\s+\d+\s+obj[\s\S]*?\/Type\s*\/Font[\s\S]*?\/ToUnicode\s+(\d+)\s+\d+\s+R[\s\S]*?endobj/g;
+    const fontObjToCmapObj = new Map<number, number>();
+    let fontMatch: RegExpExecArray | null;
+    while ((fontMatch = fontObjRegex.exec(content)) !== null) {
+      const fontObjId = parseInt(fontMatch[1], 10);
+      const toUnicodeObjId = parseInt(fontMatch[2], 10);
+      fontObjToCmapObj.set(fontObjId, toUnicodeObjId);
+    }
+
+    // Map font alias names (/F1, /F4...) from /Resources /Font << ... >> dictionaries
+    const resourceFontRegex = /\/Font\s*<<([\s\S]*?)>>/g;
+    let resMatch: RegExpExecArray | null;
+    while ((resMatch = resourceFontRegex.exec(content)) !== null) {
+      const dictBody = resMatch[1];
+      const entryRegex = /(\/[A-Za-z0-9_]+)\s+(\d+)\s+\d+\s+R/g;
+      let eMatch: RegExpExecArray | null;
+      while ((eMatch = entryRegex.exec(dictBody)) !== null) {
+        const fontName = eMatch[1];
+        const fontObjId = parseInt(eMatch[2], 10);
+        const toUnicodeObjId = fontObjToCmapObj.get(fontObjId);
+        if (toUnicodeObjId !== undefined) {
+          const cmap = objToCmapMap.get(toUnicodeObjId);
+          if (cmap) {
+            fontToUnicodeMap.set(fontName, cmap);
+          }
         }
       }
     }
 
-    if (strings.length < 3) {
-      // Fallback: extract printable ASCII sequences
-      const cleanChars = raw.replace(/[^\x20-\x7E\n]/g, ' ');
-      const words = cleanChars
-        .split('\n')
-        .map((l) => l.trim())
-        .filter((l) => l.length > 5 && !l.includes('obj') && !l.includes('endobj') && !l.includes('stream'));
-      return words.slice(0, 100);
+    // Fallback combined cmap for cases where font name is not explicitly parsed
+    const globalCmap = new Map<string, string>();
+    for (const cm of objToCmapMap.values()) {
+      for (const [k, v] of cm.entries()) {
+        if (!globalCmap.has(k)) {
+          globalCmap.set(k, v);
+        }
+      }
     }
 
-    return strings.slice(0, 150);
+    const lines: string[] = [];
+
+    // 3. Process decompressed content streams
+    for (const st of streams) {
+      const streamText = st.uncompressed;
+      if (!streamText.includes('BT') || !streamText.includes('ET')) continue;
+
+      const btBlocks = streamText.match(/BT[\s\S]*?ET/g) || [];
+      for (const block of btBlocks) {
+        let currentFont = '';
+        let currentLine = '';
+
+        // Match font selections (/F1 12 Tf) and text operators (Tj, TJ, ')
+        const opRegex = /(\/[A-Za-z0-9_]+)\s+[0-9.]+\s+Tf|<([0-9a-fA-F]+)>\s*Tj|\(([^()]*)\)\s*Tj|\[(.*?)\]\s*TJ/g;
+        let opMatch: RegExpExecArray | null;
+
+        while ((opMatch = opRegex.exec(block)) !== null) {
+          if (opMatch[1]) {
+            // Font change e.g. /F4
+            currentFont = opMatch[1];
+          } else if (opMatch[2]) {
+            // Hex text <0024003D...> Tj
+            const activeCmap = fontToUnicodeMap.get(currentFont) || globalCmap;
+            const hex = opMatch[2].toUpperCase();
+            for (let i = 0; i < hex.length; i += 4) {
+              const chunk = hex.slice(i, i + 4);
+              currentLine += activeCmap.get(chunk) || (chunk === '0020' ? ' ' : '');
+            }
+          } else if (opMatch[3] !== undefined) {
+            // Literal string (Hello World) Tj
+            const rawStr = opMatch[3].replace(/\\([nrtbf\\()])/g, '$1');
+            currentLine += rawStr;
+          } else if (opMatch[4]) {
+            // Array [ <0024> 20 (text) ] TJ
+            const activeCmap = fontToUnicodeMap.get(currentFont) || globalCmap;
+            const inner = opMatch[4];
+            const tokenRegex = /<([0-9a-fA-F]+)>|\(([^()]*)\)|(-?\d+(?:\.\d+)?)/g;
+            let tokMatch: RegExpExecArray | null;
+            while ((tokMatch = tokenRegex.exec(inner)) !== null) {
+              if (tokMatch[1]) {
+                const hex = tokMatch[1].toUpperCase();
+                for (let i = 0; i < hex.length; i += 4) {
+                  const chunk = hex.slice(i, i + 4);
+                  currentLine += activeCmap.get(chunk) || (chunk === '0020' ? ' ' : '');
+                }
+              } else if (tokMatch[2] !== undefined) {
+                currentLine += tokMatch[2].replace(/\\([nrtbf\\()])/g, '$1');
+              } else if (tokMatch[3]) {
+                // Kerning offset: large negative number indicates a space between words
+                const offset = parseFloat(tokMatch[3]);
+                if (offset < -150 && !currentLine.endsWith(' ')) {
+                  currentLine += ' ';
+                }
+              }
+            }
+          }
+        }
+
+        const trimmed = currentLine.trim();
+        if (trimmed.length > 0 && !lines.includes(trimmed)) {
+          lines.push(trimmed);
+        }
+      }
+    }
+
+    if (lines.length === 0) {
+      return [
+        '[Scanned Document Detected]',
+        'This PDF appears to be a scanned image or contains vector outlines without an embedded text layer.',
+        'To extract text from scanned images, please use the SimplePDF OCR Tool at: https://simplepdf.me/ocr-pdf',
+      ];
+    }
+
+    return lines;
   }
 
   private escapeXml(unsafe: string): string {

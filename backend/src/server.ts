@@ -120,6 +120,14 @@ app.use('/api/v1', toolsRoutes);
 
 // Liveness Probe (Kubernetes / Nginx / Load Balancers)
 app.get('/api/health', (_req: Request, res: Response) => {
+  let ephemeralFilesCount = 0;
+  try {
+    const tempDir = path.resolve(__dirname, '../../temp_storage');
+    if (fs.existsSync(tempDir)) {
+      ephemeralFilesCount = fs.readdirSync(tempDir).filter((f) => !f.startsWith('.')).length;
+    }
+  } catch (_) {}
+
   res.json({
     status: 'healthy',
     service: 'SimplePDF Production Gateway',
@@ -127,6 +135,9 @@ app.get('/api/health', (_req: Request, res: Response) => {
     uptimeSeconds: Math.round(process.uptime()),
     nodeVersion: process.version,
     memoryUsageMB: Math.round(process.memoryUsage().rss / 1024 / 1024),
+    env: config.env,
+    storageDriver: config.storage.driver,
+    ephemeralFilesCount,
   });
 });
 

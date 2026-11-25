@@ -35,12 +35,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('simplepdf_user') || localStorage.getItem('iloveyoupdf_user');
+    const saved = localStorage.getItem('simplepdf_user');
     return saved ? JSON.parse(saved) : null;
   });
 
   const [history, setHistory] = useState<ProcessingHistoryItem[]>(() => {
-    const saved = localStorage.getItem('simplepdf_history') || localStorage.getItem('iloveyoupdf_history');
+    const saved = localStorage.getItem('simplepdf_history');
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -49,7 +49,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('simplepdf_user', JSON.stringify(user));
     } else {
       localStorage.removeItem('simplepdf_user');
-      localStorage.removeItem('iloveyoupdf_user');
     }
   }, [user]);
 

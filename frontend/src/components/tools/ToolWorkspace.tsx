@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ToolMeta, UploadedFileItem, ProcessingResult } from '../../types';
 import { ALL_TOOLS } from '../../data/tools';
 import { Icon } from '../common/Icon';
@@ -18,6 +18,7 @@ import {
   redactPdfFile,
   protectPdfFile,
   convertToPdfA,
+  pdfToDocx,
   renderPdfThumbnail,
   RenderedPageImage,
 } from '../../services/clientPdfService';
@@ -73,6 +74,23 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({ tool, onNavigate }
   const [imgOrientation, setImgOrientation] = useState<'auto' | 'portrait' | 'landscape'>('auto');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Cleanly reset workspace whenever switching tools
+  useEffect(() => {
+    setFiles([]);
+    setStatus('idle');
+    setProgress(0);
+    setProgressMsg('');
+    setErrorMessage('');
+    setResult(null);
+    setExtractedJpgs([]);
+    setSplitRange('1');
+    setPagesToRemoveStr('1');
+    setCompressLevel('recommended');
+    setWatermarkText('CONFIDENTIAL');
+    setProtectPassword('');
+    setUnlockPassword('');
+  }, [tool.id]);
 
   // Format file size
   const formatSize = (bytes: number): string => {
@@ -335,7 +353,19 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({ tool, onNavigate }
         outputBlob = new Blob([bytes as any], { type: 'application/pdf' });
         outputName = `SimplePDF_archive_pdfa.pdf`;
       }
-      // 15. Server-Side Cloud Pipeline Tools (Office <-> PDF, Repair, OCR, HTML to PDF) with Circuit Breaker & Fallback
+      // 15. PDF to Word (100% In-Browser, High-Fidelity Client-Side Execution)
+      else if (tool.id === 'pdf-to-word') {
+        setProgress(20);
+        setProgressMsg('Analyzing layout and extracting high-fidelity typography...');
+        const docxBlob = await pdfToDocx(files[0].file, (p, msg) => {
+          setProgress(p);
+          setProgressMsg(msg);
+        });
+        outputBlob = docxBlob;
+        const originalBase = files[0].file.name.replace(/\.[^/.]+$/, '');
+        outputName = `${originalBase}.docx`;
+      }
+      // 16. Server-Side Cloud Pipeline Tools (Office <-> PDF, Repair, OCR, HTML to PDF) with Circuit Breaker & Fallback
       else {
         const executionResult = await cloudCircuitBreaker.execute(
           async () => {
@@ -375,7 +405,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({ tool, onNavigate }
       const downloadUrl = URL.createObjectURL(outputBlob);
       const newSize = outputBlob.size;
       const savedPct =
-        originalTotalSize > newSize && !outputName.endsWith('.zip')
+        tool.id === 'compress-pdf' && originalTotalSize > newSize && !outputName.endsWith('.zip')
           ? Math.round(((originalTotalSize - newSize) / originalTotalSize) * 100)
           : undefined;
 
@@ -416,7 +446,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({ tool, onNavigate }
 
   const isToolDisabled = React.useMemo(() => {
     try {
-      const saved = localStorage.getItem('simplepdf_tool_status') || localStorage.getItem('iloveyoupdf_tool_status');
+      const saved = localStorage.getItem('simplepdf_tool_status');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed[tool.id] === false) return true;
@@ -901,7 +931,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({ tool, onNavigate }
                 <span className="font-semibold text-slate-600">
                   File Size: <strong className="text-slate-900">{formatSize(result.fileSize)}</strong>
                 </span>
-                {result.savedPercentage !== undefined && result.savedPercentage > 0 && (
+                {tool.id === 'compress-pdf' && result.savedPercentage !== undefined && result.savedPercentage > 0 && (
                   <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                     -{result.savedPercentage}% Smaller
                   </span>
@@ -917,7 +947,13 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({ tool, onNavigate }
                 >
                   <Download className="w-5 h-5" />
                   <span>
-                    {result.fileName.endsWith('.zip') ? 'Download All Images (ZIP)' : 'Download Processed PDF'}
+                    {result.fileName.endsWith('.docx')
+                      ? 'Download Word Document (.docx)'
+                      : result.fileName.endsWith('.xlsx')
+                      ? 'Download Excel Spreadsheet (.xlsx)'
+                      : result.fileName.endsWith('.zip')
+                      ? 'Download All Images (ZIP)'
+                      : 'Download Processed Document'}
                   </span>
                 </a>
 

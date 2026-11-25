@@ -4,12 +4,24 @@
 
 @layer base {
   html {
-    scroll-behavior: smooth;
+    scroll-behavior: smooth !important;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  body {
+    scroll-behavior: smooth !important;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 }
 
-/* Custom scrollbars */
+/* Universal Smooth Scrolling & Momentum for all scrollable containers */
+*, *::before, *::after {
+  scroll-behavior: smooth;
+}
+
+/* Custom smooth scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -20,9 +32,16 @@
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 4px;
+  transition: background-color 0.2s ease;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Smooth momentum scrolling on mobile & touch devices */
+.smooth-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
 }
 
 /* Hide scrollbar utility for sleek mobile horizontal chip carousels */

@@ -7,6 +7,7 @@ import {
   downloadJobResult,
   downloadSignedResult,
   getPlatformMetrics,
+  purgeEphemeralStorage,
 } from '../controllers/tools.controller';
 import { validateMimeMagicBytes } from '../middleware/mimeValidator';
 import { ssrfGuard } from '../middleware/ssrfGuard';
@@ -42,5 +43,6 @@ router.get('/jobs/:jobId/status', getJobStatus);
 router.get('/download/signed', downloadSignedResult);
 router.get('/download/:jobId', downloadJobResult);
 router.get('/metrics', getPlatformMetrics);
+router.post('/admin/purge-storage', purgeEphemeralStorage);
 
 export default router;

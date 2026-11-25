@@ -5,7 +5,6 @@ import { getTranslations } from '../../i18n/translations';
 import { parsePath, formatLocalizedPath } from '../../utils/url';
 import { Icon } from '../common/Icon';
 import { useAuth } from '../../context/AuthContext';
-import { AuthModal } from '../auth/AuthModal';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import {
   Menu,
@@ -33,8 +32,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
   const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [toolsDropdownOpen, setToolsDropdownOpen] = useState(false);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
   // URL & Language awareness
   const { lang, cleanPath } = parsePath(currentPath);
@@ -217,26 +214,24 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
             </button>
           </nav>
 
-          {/* Right Action Buttons / User Auth State */}
+          {/* Right Action Buttons: Free Tools CTA & Language Switcher */}
           <div className="hidden sm:flex items-center gap-3">
-            {user ? (
+            {user?.role === 'admin' ? (
               <div className="flex items-center gap-2">
-                {user.role === 'admin' && (
-                  <button
-                    onClick={() => {
-                      nav('/admin');
-                      setToolsDropdownOpen(false);
-                    }}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                      cleanPath === '/admin'
-                        ? 'bg-amber-400 text-slate-900 shadow-sm'
-                        : 'bg-slate-900 text-amber-400 hover:bg-slate-800'
-                    }`}
-                  >
-                    <ShieldAlert className="w-3.5 h-3.5" />
-                    <span>{t.admin}</span>
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    nav('/admin');
+                    setToolsDropdownOpen(false);
+                  }}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    cleanPath === '/admin'
+                      ? 'bg-amber-400 text-slate-900 shadow-sm'
+                      : 'bg-slate-900 text-amber-400 hover:bg-slate-800'
+                  }`}
+                >
+                  <ShieldAlert className="w-3.5 h-3.5" />
+                  <span>{t.admin}</span>
+                </button>
 
                 <button
                   onClick={() => {
@@ -262,29 +257,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    setAuthMode('login');
-                    setAuthModalOpen(true);
-                    setToolsDropdownOpen(false);
-                  }}
-                  className="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-                >
-                  {t.login}
-                </button>
-                <button
-                  onClick={() => {
-                    setAuthMode('register');
-                    setAuthModalOpen(true);
-                    setToolsDropdownOpen(false);
-                  }}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white shadow-soft shadow-brand-500/20 hover:bg-brand-700 transition-all hover:scale-[1.02]"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-brand-200" />
-                  <span>{t.register}</span>
-                </button>
-              </div>
+              <button
+                onClick={() => setToolsDropdownOpen(!toolsDropdownOpen)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-extrabold bg-gradient-to-r from-brand-600 to-rose-500 text-white shadow-soft shadow-brand-500/20 hover:from-brand-700 hover:to-rose-600 transition-all hover:scale-[1.02]"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-brand-100" />
+                <span>{t.allPdfTools}</span>
+              </button>
             )}
 
             {/* Global Language Selector Dropdown */}
@@ -416,37 +395,26 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-8 space-y-4 max-h-[85vh] overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-150">
           {/* User Status / Quick Auth Banner */}
-          {user ? (
+          {user?.role === 'admin' ? (
             <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold">
-                  <UserIcon className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-xl bg-slate-900 text-amber-400 flex items-center justify-center font-bold">
+                  <ShieldAlert className="w-5 h-5" />
                 </div>
                 <div>
-                  <span className="text-xs font-bold text-slate-900 block">{user.name}</span>
+                  <span className="text-xs font-bold text-slate-900 block">{user.name || 'Administrator'}</span>
                   <span className="text-[11px] text-slate-500 capitalize">{user.role}</span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {user.role === 'admin' && (
-                  <button
-                    onClick={() => {
-                      nav('/admin');
-                      setMobileMenuOpen(false);
-                    }}
-                    className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-amber-400"
-                  >
-                    {t.admin}
-                  </button>
-                )}
                 <button
                   onClick={() => {
-                    nav('/dashboard');
+                    nav('/admin');
                     setMobileMenuOpen(false);
                   }}
-                  className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-brand-50 text-brand-600"
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-amber-400"
                 >
-                  {t.dashboard}
+                  {t.admin}
                 </button>
                 <button
                   onClick={() => {
@@ -461,27 +429,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-2.5">
-              <button
-                onClick={() => {
-                  setAuthMode('login');
-                  setAuthModalOpen(true);
-                  setMobileMenuOpen(false);
-                }}
-                className="py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-white text-slate-700 shadow-2xs"
-              >
-                {t.login}
-              </button>
-              <button
-                onClick={() => {
-                  setAuthMode('register');
-                  setAuthModalOpen(true);
-                  setMobileMenuOpen(false);
-                }}
-                className="py-2.5 rounded-xl text-xs font-bold bg-brand-600 text-white shadow-xs"
-              >
-                {t.register}
-              </button>
+            <div className="p-3 bg-gradient-to-r from-rose-50 to-brand-50 rounded-2xl border border-rose-100 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-brand-600" />
+                <span className="text-xs font-bold text-slate-800">100% Free Online PDF Suite</span>
+              </div>
+              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                No Signup
+              </span>
             </div>
           )}
 
@@ -635,13 +590,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
           </div>
         </div>
       )}
-
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        initialMode={authMode}
-      />
     </header>
   );
 };

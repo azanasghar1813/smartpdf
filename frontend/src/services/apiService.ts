@@ -1,4 +1,10 @@
-const BACKEND_URL = 'http://localhost:5000';
+const getBackendUrl = (): string => {
+  if (typeof window !== 'undefined' && window.location.origin.includes('simplepdf.me')) {
+    return '';
+  }
+  return (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000';
+};
+const BACKEND_URL = getBackendUrl();
 const API_BASE = `${BACKEND_URL}/api/v1`;
 
 export interface ApiJobStatus {
@@ -64,7 +70,7 @@ export class ApiService {
     formData.append('toolId', toolId);
     formData.append('options', JSON.stringify(options));
 
-    const savedUser = localStorage.getItem('simplepdf_user') || localStorage.getItem('iloveyoupdf_user');
+    const savedUser = localStorage.getItem('simplepdf_user');
     if (savedUser) {
       try {
         const u = JSON.parse(savedUser);
@@ -224,5 +230,44 @@ export class ApiService {
       // Return empty if backend unreachable
     }
     return [];
+  }
+
+  /**
+   * Admin: Trigger manual purge of expired files on server
+   */
+  public static async purgeExpiredStorage(): Promise<{ success: boolean; purgedCount: number }> {
+    try {
+      const res = await fetch(`${API_BASE}/admin/purge-storage`, { method: 'POST' });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch {}
+    return { success: false, purgedCount: 0 };
+  }
+
+  /**
+   * Get server health details
+   */
+  public static async getHealthDetails() {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/health`);
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch {}
+    return null;
+  }
+
+  /**
+   * Get server ready probe
+   */
+  public static async getReadyDetails() {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/ready`);
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch {}
+    return null;
   }
 }

@@ -1,0 +1,51 @@
+# SimplePDF — Web LLM Index & Crawler Manifest
+> Title: SimplePDF
+> Description: 100% Free, privacy-first online PDF productivity platform executing client-side in-browser WebAssembly with optional cloud conversions.
+> Canonical URL: https://simplepdf.me
+
+## Core Platform Summary
+SimplePDF (https://simplepdf.me) is a modern, privacy-focused PDF tools platform offering 32 tools for organizing, optimizing, converting, editing, and protecting PDF documents. The platform operates 100% free with no forced signup, no paywalls, and zero-retention ephemeral privacy.
+
+## Key Technical Specifications
+- In-Browser Processing Engine: WebAssembly (pdf-lib, pdf.js, Web Worker threads).
+- Privacy Model: Zero server retention for client-side operations; 60-minute cryptographic zero-fill shredding (DoD 5220.22-M) for cloud conversion jobs.
+- Maximum File Sizes: 50MB for free visitors; up to 200MB for batch conversions.
+- Supported Input Formats: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, JPG, PNG, HTML, SVG.
+
+## All 32 PDF Tools Index
+- Merge PDF: https://simplepdf.me/merge-pdf — Combine multiple PDF files into one ordered document in browser.
+- Split PDF: https://simplepdf.me/split-pdf — Separate PDF pages or extract custom page ranges.
+- Compress PDF: https://simplepdf.me/compress-pdf — Reduce PDF file size with extreme, recommended, or low compression.
+- PDF to Word: https://simplepdf.me/pdf-to-word — Convert PDF files to editable DOCX documents.
+- Word to PDF: https://simplepdf.me/word-to-pdf — Convert Microsoft Word DOC and DOCX files into PDF.
+- PDF to JPG: https://simplepdf.me/pdf-to-jpg — Extract high-resolution images from PDF pages.
+- JPG to PDF: https://simplepdf.me/jpg-to-pdf — Turn images (JPG, PNG) into a single PDF document.
+- OCR PDF: https://simplepdf.me/ocr-pdf — Convert scanned PDFs and images into searchable text documents.
+- Rotate PDF: https://simplepdf.me/rotate-pdf — Rotate PDF pages 90, 180, or 270 degrees permanently.
+- Remove Pages: https://simplepdf.me/remove-pages — Delete unwanted pages from PDF files.
+- Extract Pages: https://simplepdf.me/extract-pages — Extract selected pages into standalone PDFs.
+- Organize PDF: https://simplepdf.me/organize-pdf — Reorder, sort, and visually arrange PDF pages.
+- Protect PDF: https://simplepdf.me/protect-pdf — Encrypt PDF files with AES-256 passwords.
+- Unlock PDF: https://simplepdf.me/unlock-pdf — Remove passwords and security restrictions from PDFs.
+- Add Watermark: https://simplepdf.me/add-watermark — Add custom text stamps or image watermarks.
+- Add Page Numbers: https://simplepdf.me/add-page-numbers — Insert custom numbering and pagination headers.
+- Edit PDF: https://simplepdf.me/edit-pdf — Add text, shapes, annotations, and highlights to PDF pages.
+- Sign PDF: https://simplepdf.me/sign-pdf — Draw, type, or upload digital signatures onto PDF contracts.
+- Redact PDF: https://simplepdf.me/redact-pdf — Permanently black out sensitive data and private information.
+- Crop PDF: https://simplepdf.me/crop-pdf — Trim margins and adjust PDF page visible bounding boxes.
+- Repair PDF: https://simplepdf.me/repair-pdf — Fix corrupted and unreadable PDF structures.
+- Excel to PDF: https://simplepdf.me/excel-to-pdf — Convert Excel spreadsheets (XLS, XLSX) into PDF.
+- PDF to Excel: https://simplepdf.me/pdf-to-excel — Extract tabular data from PDF into editable XLSX sheets.
+- PowerPoint to PDF: https://simplepdf.me/powerpoint-to-pdf — Convert PPT and PPTX presentation slides to PDF.
+- PDF to PowerPoint: https://simplepdf.me/pdf-to-powerpoint — Convert PDF slides into editable PPTX decks.
+- PDF to PDF/A: https://simplepdf.me/pdf-to-pdfa — Convert PDF files to ISO-19005 archival format.
+- HTML to PDF: https://simplepdf.me/html-to-pdf — Render web pages and HTML code into PDF.
+- PDF to Markdown: https://simplepdf.me/pdf-to-markdown — Extract formatted Markdown text from PDF for AI training.
+- AI Summarizer: https://simplepdf.me/ai-summarizer — Generate key points, executive summaries, and insights from PDFs.
+- Translate PDF: https://simplepdf.me/translate-pdf — Translate documents between languages preserving structure.
+- Compare PDF: https://simplepdf.me/compare-pdf — Compare two PDF versions side-by-side highlighting visual diffs.
+- PDF Forms: https://simplepdf.me/pdf-forms — Fill out interactive AcroForm fields and export filled PDFs.
+
+## International Languages
+SimplePDF is available in 8 languages: English (en), Spanish (es), Portuguese (pt), German (de), French (fr), Arabic (ar), Hindi (hi), and Urdu (ur).
+All localized landing pages adhere to ISO 639-1 language subpaths (e.g., https://simplepdf.me/es/merge-pdf, https://simplepdf.me/ur/merge-pdf).

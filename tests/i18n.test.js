@@ -227,7 +227,8 @@ async function runAll() {
     const sitemapContent = fs.readFileSync(sitemapPath, 'utf-8');
     assert.ok(sitemapContent.includes('<loc>https://simplepdf.me/merge-pdf</loc>'), 'sitemap.xml must have /merge-pdf');
     assert.ok(sitemapContent.includes('<loc>https://simplepdf.me/compress-pdf</loc>'), 'sitemap.xml must have /compress-pdf');
-    assert.ok(sitemapContent.includes('<loc>https://simplepdf.me/protect-pdf</loc>'), 'sitemap.xml must have /protect-pdf');
+    assert.ok(sitemapContent.includes('<loc>https://simplepdf.me/split-pdf</loc>'), 'sitemap.xml must have /split-pdf');
+    assert.ok(!sitemapContent.includes('<loc>https://simplepdf.me/protect-pdf</loc>'), 'sitemap.xml must exclude coming-soon tool /protect-pdf');
     assert.ok(sitemapContent.includes('<loc>https://simplepdf.me/faq</loc>'), 'sitemap.xml must have /faq');
     assert.ok(sitemapContent.includes('<loc>https://simplepdf.me/blog/how-to-compress-pdf-without-losing-quality</loc>'), 'sitemap.xml must have blog posts');
 

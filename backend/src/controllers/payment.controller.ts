@@ -33,7 +33,7 @@ export function confirmCheckout(req: Request, res: Response) {
     success: true,
     message: `Account successfully upgraded to ${tier.toUpperCase()}!`,
     subscription: sub,
-    user: db.getUserById(targetUserId) || db.getUserByEmail('admin@simplepdf.com'),
+    user: db.getUserById(targetUserId) || db.getUserByEmail('admin@simplepdf.me'),
   });
 }
 

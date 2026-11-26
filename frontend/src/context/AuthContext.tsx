@@ -56,64 +56,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('simplepdf_history', JSON.stringify(history));
   }, [history]);
 
-  const login = (email: string, role: 'user' | 'admin' = 'user') => {
-    const newUser: User = {
-      id: `usr_${Date.now()}`,
-      name: email.split('@')[0],
-      email,
-      role,
-      tier: 'free',
-      usageCountToday: 0,
-      maxQuotaToday: 15,
-    };
-    setUser(newUser);
-
-    // Sync with backend database in background
-    ApiService.loginUser(email)
-      .then((res) => {
-        if (res && res.user) {
-          setUser({
-            id: res.user.id,
-            name: res.user.name,
-            email: res.user.email,
-            role: res.user.role,
-            tier: res.user.tier,
-            usageCountToday: res.user.usageToday || 0,
-            maxQuotaToday: res.user.tier === 'free' ? 15 : 9999,
-          });
-        }
-      })
-      .catch((err) => console.warn('[AuthContext] Backend sync offline, using local session:', err));
+  const login = async (email: string, password = '') => {
+    const res = await ApiService.loginUser(email, password);
+    if (!res || !res.user) {
+      throw new Error('Authentication failed.');
+    }
+    if (res.token) {
+      localStorage.setItem('simplepdf_jwt_token', res.token);
+    }
+    setUser({
+      id: res.user.id,
+      name: res.user.name,
+      email: res.user.email,
+      role: res.user.role,
+      tier: res.user.tier,
+      usageCountToday: res.user.usageToday || 0,
+      maxQuotaToday: res.user.tier === 'free' ? 15 : 9999,
+    });
   };
 
-  const register = (name: string, email: string) => {
-    const newUser: User = {
-      id: `usr_${Date.now()}`,
-      name,
-      email,
-      role: 'user',
-      tier: 'free',
-      usageCountToday: 0,
+  const register = async (name: string, email: string, password = '') => {
+    const res = await ApiService.registerUser(name, email, password);
+    if (!res || !res.user) {
+      throw new Error('Registration failed.');
+    }
+    if (res.token) {
+      localStorage.setItem('simplepdf_jwt_token', res.token);
+    }
+    setUser({
+      id: res.user.id,
+      name: res.user.name,
+      email: res.user.email,
+      role: res.user.role,
+      tier: res.user.tier,
+      usageCountToday: res.user.usageToday || 0,
       maxQuotaToday: 15,
-    };
-    setUser(newUser);
-
-    // Sync with backend database in background
-    ApiService.registerUser(name, email)
-      .then((res) => {
-        if (res && res.user) {
-          setUser({
-            id: res.user.id,
-            name: res.user.name,
-            email: res.user.email,
-            role: res.user.role,
-            tier: res.user.tier,
-            usageCountToday: res.user.usageToday || 0,
-            maxQuotaToday: 15,
-          });
-        }
-      })
-      .catch((err) => console.warn('[AuthContext] Backend sync offline, using local session:', err));
+    });
   };
 
   const logout = () => {

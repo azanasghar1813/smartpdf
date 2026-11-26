@@ -126,7 +126,10 @@ export const SignPadModal: React.FC<SignPadModalProps> = ({
             <div className="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">
               <PenTool className="w-4 h-4" />
             </div>
-            <h3 className="font-extrabold text-base text-slate-900">Create Your Signature</h3>
+            <div>
+              <h3 className="font-extrabold text-base text-slate-900">Create Visual E-Signature</h3>
+              <p className="text-[10px] text-slate-400 font-medium">Visual stamp for contracts and agreements</p>
+            </div>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100">
             <X className="w-5 h-5" />

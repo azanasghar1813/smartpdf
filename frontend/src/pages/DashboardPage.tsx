@@ -55,13 +55,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                   {isPro ? 'PREMIUM PRO' : 'FREE PLAN'}
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">{user?.email || 'guest@simplepdf.com'}</p>
+              <p className="text-xs text-slate-500 mt-0.5">{user?.email || 'guest@simplepdf.me'}</p>
             </div>
           </div>
 
           {!isPro && (
             <button
-              onClick={upgradeToPro}
+              onClick={() => alert('SimplePDF Pro cloud subscriptions are opening soon! All tools are currently free to use with up to 50MB per file.')}
               className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl font-bold text-xs bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-500/20 transition-all transform active:scale-95"
             >
               <Sparkles className="w-4 h-4" />

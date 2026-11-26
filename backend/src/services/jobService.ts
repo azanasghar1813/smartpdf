@@ -16,7 +16,7 @@ export class JobService {
     originalFileName: string,
     toolId: string,
     options: any = {},
-    userEmail = 'demo@simplepdf.com',
+    userEmail = 'demo@simplepdf.me',
     tier: 'free' | 'premium' | 'business' = 'free',
     idempotencyKey?: string
   ): Promise<{ success: boolean; jobId: string; status: string; message: string }> {

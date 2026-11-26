@@ -129,31 +129,37 @@ export const AdminPage: React.FC = () => {
     loadData();
   }, []);
 
-  // Compute 100% Real Operational Metrics (Zero Mock Data)
+  // Compute Real Operational Metrics (Explicitly marks unreachable when backend is offline)
   const realMetrics = useMemo(() => {
-    const totalTasks = activityLogs.length + (backendMetrics?.totalProcessedJobs || 0);
+    const backendUnreachable = backendMetrics === null;
+    const totalTasks = backendUnreachable
+      ? activityLogs.length
+      : activityLogs.length + (backendMetrics?.totalProcessedJobs || 0);
     const totalLocalBytes = activityLogs.reduce((acc, item) => acc + (item.fileSize || 0), 0);
     const localBandwidthSavedGB = totalLocalBytes / (1024 * 1024 * 1024);
     const totalBandwidthGB = ((backendMetrics?.edgeBandwidthSavedGB || 0) + localBandwidthSavedGB).toFixed(2);
     
     const completedTasks = activityLogs.filter((t) => t.status === 'completed').length;
-    const successRate = activityLogs.length > 0
+    const successRate = backendUnreachable && activityLogs.length === 0
+      ? 'Backend Unreachable'
+      : activityLogs.length > 0
       ? `${Math.round((completedTasks / activityLogs.length) * 100)}%`
-      : '100%';
+      : backendMetrics?.successRate || 'N/A';
 
     return {
+      backendUnreachable,
       totalTasks,
-      activeJobsInQueue: backendMetrics?.activeJobsInQueue || 0,
+      activeJobsInQueue: backendMetrics?.activeJobsInQueue ?? 0,
       totalBandwidthGB,
       successRate,
       activeToolsCount: Object.values(toolStatus).filter(Boolean).length,
-      tempFilesCount: healthData?.ephemeralFilesCount || 0,
-      memoryUsageMB: healthData?.memoryUsageMB || 0,
+      tempFilesCount: healthData?.ephemeralFilesCount ?? 0,
+      memoryUsageMB: healthData?.memoryUsageMB ?? 0,
       uptimeMinutes: healthData ? Math.round(healthData.uptimeSeconds / 60) : 0,
-      nodeVersion: healthData?.nodeVersion || 'N/A',
-      env: healthData?.env || 'production',
-      storageDriver: healthData?.storageDriver || 'local',
-      ephemeralPurgedCount: backendMetrics?.ephemeralFilesPurgedToday || 0,
+      nodeVersion: healthData?.nodeVersion || 'Unreachable',
+      env: healthData?.env || 'offline',
+      storageDriver: healthData?.storageDriver || 'offline',
+      ephemeralPurgedCount: backendMetrics?.ephemeralFilesPurgedToday ?? 0,
     };
   }, [activityLogs, backendMetrics, healthData, toolStatus]);
 
@@ -224,16 +230,22 @@ export const AdminPage: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
-  // Admin Authentication Gate
-  const handleAdminLogin = (e: React.FormEvent) => {
+  // Admin Authentication Gate (Strict Server-Verified Credentials)
+  const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (adminPassword === 'admin123' || adminPassword === 'admin') {
-      login('admin@simplepdf.com', 'admin');
-      sessionStorage.setItem('simplepdf_admin_auth', 'true');
-      setIsAdminAuthenticated(true);
-      setAuthError('');
-    } else {
-      setAuthError('Invalid administrator password. (Default: admin123)');
+    setAuthError('');
+    try {
+      const res = await ApiService.loginUser('admin@simplepdf.me', adminPassword);
+      if (res && res.token && res.user && res.user.role === 'admin') {
+        sessionStorage.setItem('simplepdf_admin_auth', 'true');
+        localStorage.setItem('simplepdf_jwt_token', res.token);
+        setIsAdminAuthenticated(true);
+        setAuthError('');
+      } else {
+        setAuthError('Access denied: Account does not possess administrator role.');
+      }
+    } catch (err: any) {
+      setAuthError('Authentication failed: Invalid administrator credentials.');
     }
   };
 
@@ -297,7 +309,7 @@ export const AdminPage: React.FC = () => {
               <input
                 type="email"
                 disabled
-                value="admin@simplepdf.com"
+                value="admin@simplepdf.me"
                 className="w-full px-4 py-2.5 rounded-xl bg-slate-800/60 border border-slate-700 text-slate-400 text-xs font-mono cursor-not-allowed"
               />
             </div>
@@ -335,17 +347,6 @@ export const AdminPage: React.FC = () => {
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Return to Homepage</span>
             </a>
-
-            <button
-              onClick={() => {
-                login('admin@simplepdf.com', 'admin');
-                sessionStorage.setItem('simplepdf_admin_auth', 'true');
-                setIsAdminAuthenticated(true);
-              }}
-              className="text-slate-500 hover:text-rose-400 text-[11px] underline"
-            >
-              1-Click Demo Login
-            </button>
           </div>
         </div>
       </div>
@@ -361,7 +362,7 @@ export const AdminPage: React.FC = () => {
           <div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-brand-400 text-xs font-bold mb-2">
               <ShieldAlert className="w-3.5 h-3.5" />
-              <span>Live Administrator Session (admin@simplepdf.com)</span>
+              <span>Live Administrator Session (admin@simplepdf.me)</span>
             </div>
             <h1 className="text-3xl font-extrabold tracking-tight">System Control & Operations Panel</h1>
             <p className="text-xs text-slate-400 mt-1">

@@ -22,142 +22,96 @@ export interface ComparisonResult {
 
 export class AiService {
   /**
-   * Summarize Document Text
+   * Summarize Document Text using Anthropic Claude API (requires ANTHROPIC_API_KEY)
    */
   public async summarize(text: string, depth: 'quick' | 'detailed' | 'academic' = 'detailed'): Promise<SummaryResult> {
-    const wordCount = text.split(/\s+/).filter(Boolean).length;
+    const cleanText = (text || '').trim();
+    if (cleanText.length < 20) {
+      throw new Error('This PDF has no extractable text. This looks scanned; run OCR first.');
+    }
+
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      throw new Error('AI Summarizer is not configured on this server (missing ANTHROPIC_API_KEY).');
+    }
+
+    const wordCount = cleanText.split(/\s+/).filter(Boolean).length;
     const readingTime = Math.max(1, Math.round(wordCount / 200));
+    const keyTopics = this.extractKeyTopics(cleanText);
 
-    // Extract core sentences
-    const sentences = text
-      .split(/(?<=[.?!])\s+/)
-      .map((s) => s.trim())
-      .filter((s) => s.length > 20);
+    const depthInstruction =
+      depth === 'quick'
+        ? 'Provide a concise 2-3 sentence summary and 3 short bullet points.'
+        : depth === 'academic'
+        ? 'Provide an academic executive overview with methodology/findings and 4 analytical bullet points.'
+        : 'Provide a clear 4-sentence summary and 5 key insight bullet points.';
 
-    const keyTopics = this.extractKeyTopics(text);
-
-    if (depth === 'quick') {
-      const topSentences = sentences.slice(0, 3);
-      return {
-        summary: topSentences.join(' ') || 'The document highlights essential findings and structural directives.',
-        bulletPoints: topSentences.length > 0
-          ? topSentences.map((s) => `• ${s}`)
-          : ['• Key executive finding 1', '• Main operational insight 2', '• Conclusion and next steps 3'],
-        keyTopics,
-        readingTimeMinutes: readingTime,
-      };
-    }
-
-    if (depth === 'academic') {
-      return {
-        summary: `Executive Overview: The document explores ${keyTopics.join(', ')}. Key methodological approaches and analytical evaluations are presented with empirical findings.`,
-        bulletPoints: [
-          `• Scope & Objectives: Analyzes core tenets across ${sentences.length} documented statements.`,
-          `• Primary Evaluation: ${sentences[0] || 'Systematic investigation of documented evidence.'}`,
-          `• Methodology & Observation: ${sentences[1] || 'Rigorous evaluation according to industry benchmarks.'}`,
-          `• Critical Takeaway: ${sentences[sentences.length - 1] || 'Actionable recommendations for institutional deployment.'}`,
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-haiku-latest',
+        max_tokens: 1024,
+        messages: [
+          {
+            role: 'user',
+            content: `${depthInstruction}\nRespond as JSON with keys "summary" (string) and "bulletPoints" (string[]).\n\nDocument:\n${cleanText.slice(0, 24000)}`,
+          },
         ],
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`AI provider returned HTTP ${response.status}.`);
+    }
+
+    const data: any = await response.json();
+    const raw = data?.content?.[0]?.text || '';
+    try {
+      const parsed = JSON.parse(raw);
+      return {
+        summary: parsed.summary || raw,
+        bulletPoints: Array.isArray(parsed.bulletPoints) ? parsed.bulletPoints : [],
+        keyTopics,
+        readingTimeMinutes: readingTime,
+      };
+    } catch {
+      return {
+        summary: raw,
+        bulletPoints: [],
         keyTopics,
         readingTimeMinutes: readingTime,
       };
     }
-
-    // Default: Detailed
-    const bullets = sentences.slice(0, 5).map((s, idx) => `Key Insight ${idx + 1}: ${s}`);
-    return {
-      summary: sentences.slice(0, 4).join(' ') || 'Comprehensive document analysis and thematic synthesis.',
-      bulletPoints: bullets.length > 0 ? bullets : ['Key point analysis complete.'],
-      keyTopics,
-      readingTimeMinutes: readingTime,
-    };
   }
 
   /**
-   * Translate Document Text
+   * Translate Document Text via configured translation provider (DeepL / Google)
    */
   public async translate(text: string, targetLang: string): Promise<TranslationResult> {
-    const langDicts: Record<string, Record<string, string>> = {
-      es: {
-        document: 'documento',
-        summary: 'resumen',
-        report: 'informe',
-        introduction: 'introducción',
-        conclusion: 'conclusión',
-        analysis: 'análisis',
-        data: 'datos',
-        results: 'resultados',
-        project: 'proyecto',
-        important: 'importante',
-      },
-      ur: {
-        document: 'دستاویز',
-        summary: 'خلاصہ',
-        report: 'رپورٹ',
-        introduction: 'تعارف',
-        conclusion: 'نتیجہ',
-        analysis: 'تجزیہ',
-        data: 'اعداد و شمار',
-        results: 'نتائج',
-        project: 'منصوبہ',
-        important: 'اہم',
-      },
-      fr: {
-        document: 'document',
-        summary: 'résumé',
-        report: 'rapport',
-        introduction: 'introduction',
-        conclusion: 'conclusion',
-        analysis: 'analyse',
-        data: 'données',
-        results: 'résultats',
-        project: 'projet',
-        important: 'important',
-      },
-      de: {
-        document: 'Dokument',
-        summary: 'Zusammenfassung',
-        report: 'Bericht',
-        introduction: 'Einführung',
-        conclusion: 'Fazit',
-        analysis: 'Analyse',
-        data: 'Daten',
-        results: 'Ergebnisse',
-        project: 'Projekt',
-        important: 'wichtig',
-      },
-      ar: {
-        document: 'وثيقة',
-        summary: 'ملخص',
-        report: 'تقرير',
-        introduction: 'مقدمة',
-        conclusion: 'خاتمة',
-        analysis: 'تحليل',
-        data: 'بيانات',
-        results: 'نتائج',
-        project: 'مشروع',
-        important: 'مهم',
-      },
-    };
-
-    const targetKey = targetLang.toLowerCase().slice(0, 2);
-    const dict = langDicts[targetKey];
-
-    let translated = text;
-    if (dict) {
-      for (const [k, v] of Object.entries(dict)) {
-        const regex = new RegExp(`\\b${k}\\b`, 'gi');
-        translated = translated.replace(regex, v);
-      }
-      translated = `[Translated to ${targetLang.toUpperCase()}]\n\n` + translated;
-    } else {
-      translated = `[AI Translation to ${targetLang.toUpperCase()}]\n\n${text}`;
+    const cleanText = (text || '').trim();
+    if (cleanText.length < 10) {
+      throw new Error('This PDF has no extractable text. This looks scanned; run OCR first.');
     }
 
+    const { translationService } = await import('./translationService');
+    const deeplKey = process.env.DEEPL_API_KEY;
+    const googleKey = process.env.GOOGLE_TRANSLATE_API_KEY;
+
+    if (!deeplKey && !googleKey) {
+      throw new Error('Translation API key (DEEPL_API_KEY or GOOGLE_TRANSLATE_API_KEY) is not configured on the server.');
+    }
+
+    const res = await translationService.translateText(cleanText.slice(0, 8000), targetLang);
     return {
-      sourceLanguage: 'Auto-Detected (English)',
+      sourceLanguage: res.sourceLang,
       targetLanguage: targetLang,
-      translatedText: translated,
-      characterCount: translated.length,
+      translatedText: res.text,
+      characterCount: res.text.length,
     };
   }
 

@@ -166,12 +166,19 @@ export const authService = new AuthService();
  * Express Middleware to require authentication
  */
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
+  let token = '';
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Missing or invalid Authorization header.' });
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else if (req.headers.cookie) {
+    const match = req.headers.cookie.match(/(?:^|;\s*)simplepdf_token=([^;]+)/);
+    if (match) token = decodeURIComponent(match[1]);
   }
 
-  const token = authHeader.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ error: 'Missing or invalid Authorization token.' });
+  }
+
   const verified = authService.verifyJwt(token);
 
   if (!verified.valid || !verified.payload) {
@@ -179,5 +186,16 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   }
 
   (req as any).user = verified.payload;
+  next();
+}
+
+/**
+ * Express Middleware to require administrator privileges
+ */
+export function requireAdmin(req: Request, res: Response, next: NextFunction) {
+  const user = (req as any).user as TokenPayload | undefined;
+  if (!user || user.role !== 'admin') {
+    return res.status(403).json({ error: 'Access denied: Administrator privileges required.' });
+  }
   next();
 }

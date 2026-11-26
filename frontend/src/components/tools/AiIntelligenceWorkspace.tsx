@@ -72,6 +72,13 @@ export const AiIntelligenceWorkspace: React.FC<AiIntelligenceWorkspaceProps> = (
     setProcessingAi(true);
 
     if (mode === 'summarize') {
+      const cleanSnippet = extractedText.replace(/--- Page \d+ ---/g, '').trim();
+      if (cleanSnippet.length < 25) {
+        alert('This document appears to be scanned or contains no extractable text. Scanned files require optical character recognition (OCR) before text can be summarized.');
+        setProcessingAi(false);
+        return;
+      }
+
       try {
         const depthParam = summaryDepth === 'brief' ? 'quick' : summaryDepth === 'deep' ? 'academic' : 'detailed';
         const aiResponse = await ApiService.summarizeText(extractedText, depthParam);
@@ -83,42 +90,25 @@ export const AiIntelligenceWorkspace: React.FC<AiIntelligenceWorkspaceProps> = (
         }
         setGeneratedSummary(formatted);
         addHistoryItem('AI Summarizer', file?.name || 'document.pdf', 1024);
-      } catch (err) {
-        console.warn('[AiIntelligence] Cloud AI API unreachable, using client NLP fallback:', err);
-        const cleanSnippet = extractedText.replace(/--- Page \d+ ---/g, '').trim().slice(0, 1500);
-        let summary = '';
-
-        if (summaryDepth === 'brief') {
-          summary = `### Executive Summary\nThis document primarily addresses core objectives, strategic milestones, and procedural requirements detailed across its pages. The central focus centers on operational efficiency, structured compliance, and verified execution standards.\n\n**Key Takeaway:** The provided document establishes essential frameworks and provides actionable direction for ongoing workflows.`;
-        } else if (summaryDepth === 'bullets') {
-          summary = `### Key Actionable Takeaways\n- **Core Objective:** Detailed operational framework and guidelines established.\n- **Primary Stakeholders:** Identified administrative, technical, and operational participants.\n- **Risk Mitigation:** Strict procedural compliance enforced to minimize downstream delays.\n- **Timeline & Milestones:** Phased deliverables outlined with clear accountability metrics.\n- **Execution Protocol:** Standardized verification checklists prioritized.`;
-        } else {
-          summary = `### Comprehensive In-Depth Breakdown\n\n#### 1. Background & Scope\nThe document outlines foundational requirements, historical context, and primary operational constraints.\n\n#### 2. Procedural Methodology\nSpecific protocols and compliance metrics are established to guide implementation and auditing.\n\n#### 3. Strategic Outcomes\nExpected performance metrics, safety thresholds, and verifiable goals are formalized for all stakeholders.`;
-        }
-
-        setGeneratedSummary(summary);
-        addHistoryItem('AI Summarizer', file?.name || 'document.pdf', 1024);
+      } catch (err: any) {
+        console.warn('[AiIntelligence] Cloud AI API error:', err);
+        setGeneratedSummary(`### Service Notice\nUnable to generate AI summary at this time (${err?.message || 'Cloud AI engine offline'}). Please ensure backend AI service is running and try again.`);
       }
     } else {
+      const cleanSnippet = extractedText.replace(/--- Page \d+ ---/g, '').trim();
+      if (cleanSnippet.length < 10) {
+        alert('This document contains no extractable text to translate. Please upload a text-based document.');
+        setProcessingAi(false);
+        return;
+      }
+
       try {
         const aiResponse = await ApiService.translateText(extractedText.slice(0, 3000), targetLang);
         setTranslatedContent(aiResponse.translatedText);
         addHistoryItem('Translate PDF', file?.name || 'document.pdf', 1024);
-      } catch (err) {
-        console.warn('[AiIntelligence] Cloud Translation API unreachable, using client dictionary fallback:', err);
-        const translatedMap: Record<string, string> = {
-          Spanish: `### Traducción al Español\nEste documento describe los objetivos principales, los hitos estratégicos y los requisitos de cumplimiento detallados en sus páginas. El enfoque central gira en torno a la eficiencia operativa y los estándares de ejecución verificados.\n\n**Puntos clave:** El documento establece marcos esenciales y proporciona una dirección clara para los flujos de trabajo en curso.`,
-          French: `### Traduction en Français\nCe document décrit les objectifs principaux, les étapes stratégiques et les exigences de conformité détaillées dans ses pages. L'accent est mis sur l'efficacité opérationnelle et les normes d'exécution vérifiées.\n\n**Points clés:** Le document établit des cadres essentiels et fournit une orientation claire pour les flux de travail en cours.`,
-          Urdu: `### اردو ترجمہ\nیہ دستاویز بنیادی مقاصد، اسٹریٹجک سنگ میل، اور اس کے صفحات میں تفصیلی تعمیل کے تقاضوں کی وضاحت کرتی ہے۔ بنیادی توجہ آپریشنل کارکردگی اور تصدیق شدہ عمل درآمد کے معیارات پر مرکوز ہے۔\n\n**اہم نکات:** یہ دستاویز جاری ورک فلو کے لیے ایک جامع فریم ورک اور واضح رہنمائی فراہم کرتی ہے۔`,
-          German: `### Übersetzung ins Deutsche\nDieses Dokument beschreibt die Kernziele, strategischen Meilensteine und detaillierten Compliance-Anforderungen. Der Schwerpunkt liegt auf betrieblicher Effizienz und verifizierten Ausführungsstandards.`,
-          Arabic: `### الترجمة إلى العربية\nتوضح هذه الوثيقة الأهداف الأساسية والمعالم الاستراتيجية ومتطلبات الامتثال التفصيلية. ينصب التركيز الرئيسي على الكفاءة التشغيلية ومعايير التنفيذ التي تم التحقق منها.`,
-        };
-
-        setTranslatedContent(
-          translatedMap[targetLang] ||
-            `### Translated Output (${targetLang})\nDocument content processed into ${targetLang} preserving paragraph structure, technical terms, and numeric formatting.`
-        );
-        addHistoryItem('Translate PDF', file?.name || 'document.pdf', 1024);
+      } catch (err: any) {
+        console.warn('[AiIntelligence] Cloud Translation API error:', err);
+        setTranslatedContent(`### Translation Notice\nTranslation service is temporarily unavailable (${err?.message || 'Server connection failed'}). Please try again shortly.`);
       }
     }
 

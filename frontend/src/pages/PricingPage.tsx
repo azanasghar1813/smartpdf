@@ -75,7 +75,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate, currentLan
         'Custom maximum file limits (1GB+)',
         'REST API Developer Access (PDF automation)',
         'Dedicated SLA & 99.9% uptime guarantee',
-        'SOC2 & HIPAA compliance documentation',
+        'Zero-retention privacy architecture',
         'Centralized billing & invoicing',
       ],
       notIncluded: [],
@@ -157,9 +157,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate, currentLan
                 <button
                   onClick={() => {
                     if (idx === 1) {
-                      upgradeToPro();
-                      alert('🎉 Congratulations! Your account has been upgraded to Premium Pro ($4.99/mo). Unlimited quota and cloud OCR/AI features are now unlocked!');
-                      nav('/dashboard');
+                      alert('⚡ Premium Pro subscriptions are currently in closed beta. In the meantime, you have 100% free unlimited access to all 32 client-side PDF tools with up to 50MB per file!');
                     } else if (idx === 2) {
                       nav('/contact');
                     } else {

@@ -10,6 +10,7 @@ import { SecurityBanner } from './components/home/SecurityBanner';
 import { FAQSection } from './components/home/FAQSection';
 import { AdPlacement } from './components/ads/AdPlacement';
 import { SEOHead } from './components/common/SEOHead';
+import { CookieConsent } from './components/common/CookieConsent';
 import { ALL_TOOLS } from './data/tools';
 import { BLOG_POSTS, BlogPost } from './data/blogPosts';
 import { parsePath, formatLocalizedPath } from './utils/url';
@@ -138,6 +139,7 @@ const AppContent: React.FC = () => {
       </main>
 
       <Footer onNavigate={navigateTo} currentPath={currentPath} />
+      <CookieConsent />
     </div>
   );
 };

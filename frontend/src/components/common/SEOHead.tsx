@@ -81,7 +81,11 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
     : getCanonicalUrl(currentPath);
 
   const hreflangLinks = getHreflangLinks(cleanPath);
-  const ogImage = `${SITE_URL}/logo.svg`;
+  const ogImage = `${SITE_URL}/og-cover.png`;
+  const robotsDirective =
+    tool?.status === 'coming-soon'
+      ? 'noindex, follow'
+      : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
 
   useEffect(() => {
     // 1. Update HTML language and text direction attributes
@@ -108,9 +112,9 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
       ? tool.seoKeywords.join(', ')
       : 'simplepdf, free online pdf tools, merge pdf, compress pdf, convert pdf to word, edit pdf, ocr pdf, split pdf, sign pdf, protect pdf';
     setMetaTag('name', 'keywords', pageKeywords);
-    setMetaTag('name', 'robots', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
-    setMetaTag('name', 'googlebot', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
-    setMetaTag('name', 'bingbot', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+    setMetaTag('name', 'robots', robotsDirective);
+    setMetaTag('name', 'googlebot', robotsDirective);
+    setMetaTag('name', 'bingbot', robotsDirective);
 
     // 4. Open Graph Tags
     setMetaTag('property', 'og:type', blogPost ? 'article' : 'website');
@@ -237,15 +241,17 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
         });
       }
     } else if (blogPost) {
-      // BlogPosting Schema
+      // BlogPosting Schema using real publishedDate
+      const parsedDate = Date.parse(blogPost.publishedDate);
+      const isoDate = !isNaN(parsedDate) ? new Date(parsedDate).toISOString().split('T')[0] : '2026-11-18';
       schemas.push({
         '@context': 'https://schema.org',
         '@type': 'BlogPosting',
         headline: blogPost.title,
         description: blogPost.excerpt,
         url: canonicalUrl,
-        datePublished: '2026-11-18',
-        dateModified: '2026-11-18',
+        datePublished: isoDate,
+        dateModified: isoDate,
         author: {
           '@type': 'Organization',
           name: blogPost.author || 'SimplePDF Team',
@@ -341,11 +347,6 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
         name: 'SimplePDF',
         url: SITE_URL,
         description: 'All-in-one online PDF productivity platform with in-browser privacy.',
-        potentialAction: {
-          '@type': 'SearchAction',
-          target: `${SITE_URL}/search?q={search_term_string}`,
-          'query-input': 'required name=search_term_string',
-        },
       });
 
       schemas.push({

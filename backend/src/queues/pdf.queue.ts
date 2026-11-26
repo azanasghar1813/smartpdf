@@ -17,8 +17,10 @@ export interface PdfJobPayload {
 }
 
 /**
- * Enterprise Distributed Queue Service (BullMQ compatible contract)
+ * In-Memory Priority Job Queue Service (with BullMQ-compatible interface)
  * Supports priority scheduling, backpressure, idempotency, and progress tracking.
+ * Note: Jobs are stored in process memory; persistent Redis/BullMQ queue backing
+ * should be enabled for multi-node production persistence across restarts.
  */
 export class PdfJobQueue extends EventEmitter {
   private queue: PdfJobPayload[] = [];

@@ -94,12 +94,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div
+          <button
+            type="button"
             onClick={() => {
               nav('/');
               setToolsDropdownOpen(false);
             }}
-            className="flex items-center gap-2.5 cursor-pointer group select-none"
+            className="flex items-center gap-2.5 cursor-pointer group select-none text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded-xl"
           >
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-rose-400 flex items-center justify-center text-white shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform">
               <FileText className="w-5 h-5 text-white" />
@@ -109,15 +110,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPath }) => {
                 Simple<span className="text-brand-600">PDF</span>
               </span>
             </div>
-          </div>
+          </button>
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-1">
             {/* All Tools Mega Dropdown Trigger */}
             <button
               ref={buttonRef}
+              type="button"
               onClick={() => setToolsDropdownOpen(!toolsDropdownOpen)}
-              onMouseEnter={() => setToolsDropdownOpen(true)}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl font-bold text-sm transition-colors ${
                 toolsDropdownOpen || (cleanPath.startsWith('/') && cleanPath !== '/' && cleanPath !== '/pricing' && cleanPath !== '/blog')
                   ? 'text-brand-600 bg-brand-50'

@@ -44,8 +44,7 @@ export class ConversionService {
       case 'compress-pdf':
         return await this.compressPdf(inputBuffer, baseName, options?.level);
       default:
-        // Universal fallback: pass through or rebuild PDF
-        return await this.repairPdf(inputBuffer, baseName);
+        throw new Error(`Unsupported conversion tool: '${toolId}'. Please verify the requested operation.`);
     }
   }
 
@@ -698,58 +697,9 @@ export class ConversionService {
         resultFileName: `${baseName}_repaired.pdf`,
         mimeType: 'application/pdf',
       };
-    } catch (err) {
-      console.warn('[ConversionService] Deep repair mode triggered:', err);
-      // Construct a new valid container wrapping recoverable stream chunks
-      const newDoc = await pdfLib.PDFDocument.create();
-      const page = newDoc.addPage([595.28, 841.89]);
-      const font = await newDoc.embedFont(pdfLib.StandardFonts.Helvetica);
-      const fontBold = await newDoc.embedFont(pdfLib.StandardFonts.HelveticaBold);
-
-      page.drawText('SimplePDF — Document Recovery Report', {
-        x: 50,
-        y: 780,
-        size: 16,
-        font: fontBold,
-        color: pdfLib.rgb(0.88, 0.11, 0.28),
-      });
-
-      page.drawText('Original document had severe structural damage or invalid cross-reference headers.', {
-        x: 50,
-        y: 740,
-        size: 10,
-        font,
-        color: pdfLib.rgb(0.2, 0.25, 0.33),
-      });
-
-      page.drawText('Recovered stream content is preserved below:', {
-        x: 50,
-        y: 720,
-        size: 10,
-        font: fontBold,
-        color: pdfLib.rgb(0.1, 0.1, 0.1),
-      });
-
-      const extracted = this.extractTextFromPdfBuffer(inputBuffer);
-      let y = 690;
-      for (const line of extracted.slice(0, 30)) {
-        if (y < 60) break;
-        page.drawText(line.slice(0, 90), {
-          x: 50,
-          y,
-          size: 9,
-          font,
-          color: pdfLib.rgb(0.2, 0.2, 0.2),
-        });
-        y -= 18;
-      }
-
-      const bytes = await newDoc.save();
-      return {
-        resultBuffer: Buffer.from(bytes),
-        resultFileName: `${baseName}_repaired.pdf`,
-        mimeType: 'application/pdf',
-      };
+    } catch (err: any) {
+      console.warn('[ConversionService] Repair failed — document is severely corrupted:', err?.message || err);
+      throw new Error('This PDF file has severe structural damage or invalid cross-reference tables and cannot be repaired.');
     }
   }
 

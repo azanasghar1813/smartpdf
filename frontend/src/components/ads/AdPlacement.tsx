@@ -7,10 +7,22 @@ interface AdPlacementProps {
 }
 
 export const AdPlacement: React.FC<AdPlacementProps> = ({
+  slotId,
   format = 'horizontal',
   className = '',
 }) => {
-  // Height and aspect ratio styling based on format
+  const adsenseClient = (import.meta as any).env?.VITE_GOOGLE_ADSENSE_CLIENT_ID;
+  const isConfigured =
+    Boolean(adsenseClient) &&
+    !String(adsenseClient).startsWith('%') &&
+    adsenseClient !== 'ca-pub-xxxxxxxxxxxxxxxx' &&
+    Boolean(slotId);
+
+  // Do not render fake placeholder boxes when AdSense is not configured
+  if (!isConfigured) {
+    return null;
+  }
+
   const formatClasses = {
     horizontal: 'h-24 sm:h-28 w-full max-w-4xl mx-auto',
     rectangle: 'h-64 w-full max-w-sm mx-auto',
@@ -19,21 +31,16 @@ export const AdPlacement: React.FC<AdPlacementProps> = ({
 
   return (
     <div className={`my-8 px-4 flex flex-col items-center ${className}`}>
-      {/* Compliance Label: Google Policy requirement to clearly identify ads */}
       <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 select-none">
         Advertisement
       </span>
-
-      <div
-        className={`${formatClasses} rounded-xl border border-dashed border-slate-300 bg-slate-100/70 flex flex-col items-center justify-center p-4 text-center select-none overflow-hidden`}
-      >
-        <span className="text-xs font-semibold text-slate-500">
-          Google AdSense Placement
-        </span>
-        <span className="text-[11px] text-slate-400 mt-0.5">
-          Non-intrusive, compliant sponsor display area
-        </span>
-      </div>
+      <ins
+        className={`adsbygoogle block ${formatClasses}`}
+        data-ad-client={adsenseClient}
+        data-ad-slot={slotId}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      />
     </div>
   );
 };

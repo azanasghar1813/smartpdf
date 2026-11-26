@@ -120,14 +120,19 @@ export async function removePagesFromPdf(
  */
 export async function rotatePdfFile(
   file: File,
-  rotationMap: Record<number, number> // pageIndex (0-based) -> additional rotation (90, 180, 270)
+  rotationMapOrAngle: Record<number, number> | number = 90
 ): Promise<Uint8Array> {
   const arrayBuffer = await file.arrayBuffer();
   const pdfDoc = await PDFDocument.load(arrayBuffer);
   const pages = pdfDoc.getPages();
 
   pages.forEach((page, index) => {
-    const additionalRotation = rotationMap[index] || 0;
+    let additionalRotation = 0;
+    if (typeof rotationMapOrAngle === 'number') {
+      additionalRotation = rotationMapOrAngle;
+    } else {
+      additionalRotation = rotationMapOrAngle[index] ?? rotationMapOrAngle[-1] ?? 0;
+    }
     if (additionalRotation !== 0) {
       const currentRotation = page.getRotation().angle;
       page.setRotation(degrees((currentRotation + additionalRotation) % 360));
@@ -482,7 +487,7 @@ export async function convertToPdfA(file: File): Promise<Uint8Array> {
 }
 
 /**
- * Convert PDF to Microsoft Word (.docx) with 100% in-browser privacy & layout preservation
+ * Convert PDF to Microsoft Word (.docx) with 100% in-browser privacy & high-fidelity layout preservation
  */
 export async function pdfToDocx(
   file: File,
@@ -505,99 +510,351 @@ export async function pdfToDocx(
   const pdfDocument = await loadingTask.promise;
   const numPages = pdfDocument.numPages;
 
-  const docParagraphs: { text: string; isHeading: boolean; isBullet: boolean }[] = [];
+  const escapeXml = (unsafe: string) =>
+    unsafe
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+
+  // Accumulated Word XML blocks
+  const documentXmlBlocks: string[] = [];
   let totalExtractedItems = 0;
 
   for (let pageNum = 1; pageNum <= numPages; pageNum++) {
     const pct = 15 + Math.round((pageNum / numPages) * 70);
-    onProgress?.(pct, `Analyzing layout and typography on page ${pageNum} of ${numPages}...`);
+    onProgress?.(pct, `Analyzing layout and columns on page ${pageNum} of ${numPages}...`);
 
     const page = await pdfDocument.getPage(pageNum);
+    const viewport = page.getViewport({ scale: 1.0 });
     const textContent = await page.getTextContent();
-    const items = (textContent.items || []) as any[];
-    totalExtractedItems += items.length;
+    const rawItems = (textContent.items || []) as any[];
+    totalExtractedItems += rawItems.length;
 
-    if (items.length === 0) {
-      docParagraphs.push({
-        text: `[Page ${pageNum}: Scanned image or non-selectable vector page]`,
-        isHeading: false,
-        isBullet: false,
-      });
+    if (rawItems.length === 0) {
+      documentXmlBlocks.push(
+        `<w:p><w:pPr><w:spacing w:after="120"/></w:pPr><w:r><w:rPr><w:i/><w:color w:val="64748B"/></w:rPr><w:t>[Page ${pageNum}: Scanned image or non-selectable vector page]</w:t></w:r></w:p>`
+      );
       continue;
     }
 
-    // Group items into horizontal lines based on Y coordinate
-    // PDF coordinates: origin at bottom-left, Y increases upwards
-    const lines: { y: number; height: number; items: any[] }[] = [];
-    const sortedItems = [...items].sort((a, b) => b.transform[5] - a.transform[5]);
+    // 1. Convert all items to normalized Viewport coordinates
+    // (vx: points from left, vy: points from TOP of page increasing downwards)
+    const pageItems = rawItems
+      .filter((it) => it && it.str && it.str.length > 0)
+      .map((it) => {
+        let vx = it.transform ? it.transform[4] : 0;
+        let vy = it.transform ? it.transform[5] : 0;
+        try {
+          if (viewport && typeof viewport.convertToViewportPoint === 'function') {
+            const pt = viewport.convertToViewportPoint(vx, vy);
+            vx = pt[0];
+            vy = pt[1];
+          }
+        } catch {}
 
-    for (const item of sortedItems) {
-      const itemY = item.transform[5];
-      const itemHeight = item.height || Math.abs(item.transform[3]) || 10;
+        const h = it.height || Math.abs(it.transform ? it.transform[3] : 10) || 10;
+        const w = it.width || (it.str.length * h * 0.48);
+        const fontName = it.fontName || '';
+        const isBold = /bold|heavy|black|w6|w7|w8/i.test(fontName);
 
-      let existingLine = lines.find((l) => Math.abs(l.y - itemY) <= Math.max(itemHeight * 0.45, 3));
+        return {
+          str: it.str,
+          x: vx,
+          y: vy,
+          w,
+          h,
+          fontName,
+          isBold,
+        };
+      });
+
+    // 2. Sort items by vertical Y (top to bottom)
+    pageItems.sort((a, b) => a.y - b.y);
+
+    // 3. Cluster items into horizontal lines based on Y
+    interface LineItem {
+      y: number;
+      h: number;
+      items: typeof pageItems;
+    }
+    const lines: LineItem[] = [];
+
+    for (const item of pageItems) {
+      let existingLine = lines.find((l) => Math.abs(l.y - item.y) <= Math.max(item.h * 0.45, 3.5));
       if (!existingLine) {
-        existingLine = { y: itemY, height: itemHeight, items: [] };
+        existingLine = { y: item.y, h: item.h, items: [] };
         lines.push(existingLine);
       }
       existingLine.items.push(item);
     }
 
     // Sort lines from top of page to bottom
-    lines.sort((a, b) => b.y - a.y);
+    lines.sort((a, b) => a.y - b.y);
 
-    for (const line of lines) {
-      // Sort items within line from left to right (X coordinate)
-      line.items.sort((a, b) => a.transform[4] - b.transform[4]);
+    // 4. Helper to join items on a line or column into formatted XML runs
+    const renderRunSpans = (items: typeof pageItems, customSize?: number, defaultColor = '334155'): string => {
+      if (items.length === 0) return '';
+      // Sort left to right
+      items.sort((a, b) => a.x - b.x);
 
-      let lineText = '';
-      for (let i = 0; i < line.items.length; i++) {
-        const cur = line.items[i];
+      let runsXml = '';
+      let curText = '';
+      let curBold = items[0].isBold;
+
+      for (let i = 0; i < items.length; i++) {
+        const cur = items[i];
         if (i > 0) {
-          const prev = line.items[i - 1];
-          const prevEndX = prev.transform[4] + (prev.width || 0);
-          const curStartX = cur.transform[4];
-          if (curStartX - prevEndX > 2 && !lineText.endsWith(' ') && !cur.str.startsWith(' ')) {
-            lineText += ' ';
+          const prev = items[i - 1];
+          const prevEnd = prev.x + prev.w;
+          const gap = cur.x - prevEnd;
+          // Insert space between words if distance indicates a space gap
+          if (gap > 1.2 && !curText.endsWith(' ') && !cur.str.startsWith(' ')) {
+            curText += ' ';
           }
         }
-        lineText += cur.str;
+
+        if (cur.isBold !== curBold) {
+          if (curText) {
+            runsXml += `<w:r><w:rPr>${curBold ? '<w:b/>' : ''}${customSize ? `<w:sz w:val="${customSize}"/>` : ''}<w:color w:val="${curBold ? '0F172A' : defaultColor}"/></w:rPr><w:t xml:space="preserve">${escapeXml(curText)}</w:t></w:r>`;
+          }
+          curText = cur.str;
+          curBold = cur.isBold;
+        } else {
+          curText += cur.str;
+        }
       }
 
-      const cleanText = lineText.trim();
-      if (!cleanText) continue;
+      if (curText) {
+        runsXml += `<w:r><w:rPr>${curBold ? '<w:b/>' : ''}${customSize ? `<w:sz w:val="${customSize}"/>` : ''}<w:color w:val="${curBold ? '0F172A' : defaultColor}"/></w:rPr><w:t xml:space="preserve">${escapeXml(curText)}</w:t></w:r>`;
+      }
 
-      const isHeading =
-        line.height >= 14 ||
-        line.items.some((it) => it.fontName?.toLowerCase().includes('bold')) ||
-        (cleanText.length < 50 && cleanText === cleanText.toUpperCase() && /[A-Z]/.test(cleanText));
-      const isBullet = /^[\u2022\u25E6\u25AA\*\-\–\—]/.test(cleanText) || /^\d+\.\s/.test(cleanText);
+      return runsXml;
+    };
 
-      docParagraphs.push({
-        text: cleanText,
-        isHeading,
-        isBullet,
-      });
+    // 5. Structure lines into Headings, Badges, Tables, and Paragraphs
+    const midX = (viewport.width || 595) * 0.48;
+    let lineIdx = 0;
+
+    while (lineIdx < lines.length) {
+      const line = lines[lineIdx];
+      line.items.sort((a, b) => a.x - b.x);
+
+      // Check if line has items on left and items on right
+      const leftItems = line.items.filter((it) => it.x < midX);
+      const rightItems = line.items.filter((it) => it.x >= midX);
+
+      // Check if this line is part of a 2-COLUMN SECTION (e.g. Technical Skills)
+      const hasColumnSplit =
+        leftItems.length > 0 &&
+        rightItems.length > 0 &&
+        (rightItems[0].x - (leftItems[leftItems.length - 1].x + leftItems[leftItems.length - 1].w)) > 25 &&
+        rightItems[0].x < (viewport.width || 595) * 0.75; // Right item is a column, not just a right-aligned badge
+
+      if (hasColumnSplit) {
+        // Collect consecutive lines that belong to this two-column table
+        const tableRows: { left: typeof pageItems; right: typeof pageItems }[] = [];
+
+        while (lineIdx < lines.length) {
+          const curLine = lines[lineIdx];
+          curLine.items.sort((a, b) => a.x - b.x);
+          const cLeft = curLine.items.filter((it) => it.x < midX);
+          const cRight = curLine.items.filter((it) => it.x >= midX);
+
+          // Stop if line is a major heading or full width paragraph
+          const fullText = curLine.items.map((it) => it.str).join(' ').trim();
+          const isMajorHeading =
+            curLine.h >= 14 ||
+            (fullText.length < 40 && fullText === fullText.toUpperCase() && /^[A-Z\s\-]+$/.test(fullText));
+
+          if (isMajorHeading && tableRows.length > 0) {
+            break;
+          }
+
+          if (cLeft.length > 0 || cRight.length > 0) {
+            tableRows.push({ left: cLeft, right: cRight });
+            lineIdx++;
+          } else {
+            break;
+          }
+
+          // If next line has no right column and is not indented, break table
+          if (lineIdx < lines.length) {
+            const nextL = lines[lineIdx];
+            const nextRight = nextL.items.filter((it) => it.x >= midX);
+            const nextText = nextL.items.map((it) => it.str).join(' ').trim();
+            if (nextRight.length === 0 && (/^[A-Z\s]{4,}$/.test(nextText) || nextL.h >= 13)) {
+              break;
+            }
+          }
+        }
+
+        // Render borderless 2-column Word Table
+        let tableXml = `<w:tbl>
+          <w:tblPr>
+            <w:tblW w:w="9360" w:type="dxa"/>
+            <w:tblBorders>
+              <w:top w:val="none"/>
+              <w:left w:val="none"/>
+              <w:bottom w:val="none"/>
+              <w:right w:val="none"/>
+              <w:insideH w:val="none"/>
+              <w:insideV w:val="none"/>
+            </w:tblBorders>
+          </w:tblPr>
+          <w:tblGrid>
+            <w:gridCol w:w="4680"/>
+            <w:gridCol w:w="4680"/>
+          </w:tblGrid>`;
+
+        for (const row of tableRows) {
+          tableXml += `<w:tr>
+            <w:tc>
+              <w:tcPr><w:tcW w:w="4680" w:type="dxa"/><w:tcMar><w:top w:w="60" w:type="dxa"/><w:bottom w:w="60" w:type="dxa"/></w:tcMar></w:tcPr>
+              <w:p><w:pPr><w:spacing w:after="60" w:line="240" w:lineRule="auto"/></w:pPr>${renderRunSpans(row.left, 20)}</w:p>
+            </w:tc>
+            <w:tc>
+              <w:tcPr><w:tcW w:w="4680" w:type="dxa"/><w:tcMar><w:top w:w="60" w:type="dxa"/><w:bottom w:w="60" w:type="dxa"/></w:tcMar></w:tcPr>
+              <w:p><w:pPr><w:spacing w:after="60" w:line="240" w:lineRule="auto"/></w:pPr>${renderRunSpans(row.right, 20)}</w:p>
+            </w:tc>
+          </w:tr>`;
+        }
+
+        tableXml += `</w:tbl>`;
+        documentXmlBlocks.push(tableXml);
+        continue;
+      }
+
+      // Check if line has a RIGHT-ALIGNED BADGE (e.g. Title on left, [CLIENT PROJECT] on far right)
+      const isRightBadgeLine =
+        leftItems.length > 0 &&
+        rightItems.length > 0 &&
+        rightItems[0].x >= (viewport.width || 595) * 0.65;
+
+      if (isRightBadgeLine) {
+        const leftRuns = renderRunSpans(leftItems, 22, '0F172A');
+        const rightRuns = renderRunSpans(rightItems, 18, '0D9488');
+
+        documentXmlBlocks.push(
+          `<w:p>
+            <w:pPr>
+              <w:tabs><w:tab w:val="right" w:pos="9360"/></w:tabs>
+              <w:spacing w:before="140" w:after="40"/>
+            </w:pPr>
+            ${leftRuns}
+            <w:r><w:tab/></w:r>
+            ${rightRuns}
+          </w:p>`
+        );
+        lineIdx++;
+        continue;
+      }
+
+      // Check for Major Section Headings (PROFILE, TECHNICAL SKILLS, CLIENT PROJECTS, EDUCATION, etc.)
+      const lineStr = line.items.map((it) => it.str).join(' ').trim();
+      const isMajorSectionHeading =
+        /^(PROFILE|TECHNICAL SKILLS|CLIENT PROJECTS|PERSONAL PROJECTS|WORK EXPERIENCE|EDUCATION|WHY HIRE ME|SUMMARY|EXPERIENCE)/i.test(
+          lineStr
+        ) && lineStr.length < 40;
+
+      if (isMajorSectionHeading) {
+        documentXmlBlocks.push(
+          `<w:p>
+            <w:pPr>
+              <w:pStyle w:val="Heading1"/>
+              <w:pBdr>
+                <w:bottom w:val="single" w:sz="8" w:space="4" w:color="0F172A"/>
+              </w:pBdr>
+              <w:spacing w:before="240" w:after="80"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:b/>
+                <w:sz w:val="26"/>
+                <w:color w:val="0F172A"/>
+              </w:rPr>
+              <w:t xml:space="preserve">${escapeXml(lineStr)}</w:t>
+            </w:r>
+          </w:p>`
+        );
+        lineIdx++;
+        continue;
+      }
+
+      // Check for Name / Document Top Header
+      const isTopTitle = line.h >= 16 || (lineStr === lineStr.toUpperCase() && line.h >= 13 && lineIdx === 0);
+      if (isTopTitle) {
+        documentXmlBlocks.push(
+          `<w:p>
+            <w:pPr>
+              <w:spacing w:before="60" w:after="40"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:b/>
+                <w:sz w:val="36"/>
+                <w:color w:val="0F172A"/>
+              </w:rPr>
+              <w:t xml:space="preserve">${escapeXml(lineStr)}</w:t>
+            </w:r>
+          </w:p>`
+        );
+        lineIdx++;
+        continue;
+      }
+
+      // Check for Bullet points
+      const isBullet = /^[\u2022\u203A\u25E6\u25AA\*\-\–\—]/.test(lineStr) || /^\d+\.\s/.test(lineStr);
+      if (isBullet) {
+        const cleanedItems = line.items.map((it, idx) => {
+          if (idx === 0) {
+            return {
+              ...it,
+              str: it.str.replace(/^[\u2022\u203A\u25E6\u25AA\*\-\–\—]\s*/, ''),
+            };
+          }
+          return it;
+        });
+
+        documentXmlBlocks.push(
+          `<w:p>
+            <w:pPr>
+              <w:pStyle w:val="ListBullet"/>
+              <w:ind w:left="480" w:hanging="240"/>
+              <w:spacing w:after="60" w:line="240" w:lineRule="auto"/>
+            </w:pPr>
+            ${renderRunSpans(cleanedItems, 20)}
+          </w:p>`
+        );
+        lineIdx++;
+        continue;
+      }
+
+      // Standard Paragraph Line
+      documentXmlBlocks.push(
+        `<w:p>
+          <w:pPr>
+            <w:spacing w:after="80" w:line="240" w:lineRule="auto"/>
+          </w:pPr>
+          ${renderRunSpans(line.items, 20)}
+        </w:p>`
+      );
+      lineIdx++;
     }
 
     if (pageNum < numPages) {
-      docParagraphs.push({
-        text: '--- PAGE BREAK ---',
-        isHeading: false,
-        isBullet: false,
-      });
+      documentXmlBlocks.push(`<w:p><w:r><w:br w:type="page"/></w:r></w:p>`);
     }
   }
 
   if (totalExtractedItems === 0) {
-    docParagraphs.push({
-      text: 'SimplePDF Notice: This document appears to be a scanned image or photo without selectable text. Use the OCR PDF tool at https://simplepdf.me/ocr-pdf to convert scanned images to editable text.',
-      isHeading: false,
-      isBullet: false,
-    });
+    documentXmlBlocks.push(
+      `<w:p><w:r><w:t>SimplePDF Notice: This document appears to be a scanned image or photo without selectable text. Use our OCR PDF tool at https://simplepdf.me/ocr-pdf to convert scanned images to editable text.</w:t></w:r></w:p>`
+    );
   }
 
-  onProgress?.(90, 'Generating Microsoft Word (.docx) package...');
+  onProgress?.(90, 'Packaging high-fidelity Microsoft Word (.docx) file...');
 
   const zip = new JSZip();
 
@@ -640,14 +897,14 @@ export async function pdfToDocx(
     <w:rPrDefault>
       <w:rPr>
         <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/>
-        <w:sz w:val="22"/>
+        <w:sz w:val="20"/>
         <w:color w:val="1E293B"/>
         <w:lang w:val="en-US"/>
       </w:rPr>
     </w:rPrDefault>
     <w:pPrDefault>
       <w:pPr>
-        <w:spacing w:after="120" w:line="276" w:lineRule="auto"/>
+        <w:spacing w:after="80" w:line="240" w:lineRule="auto"/>
       </w:pPr>
     </w:pPrDefault>
   </w:docDefaults>
@@ -660,47 +917,31 @@ export async function pdfToDocx(
     <w:basedOn w:val="Normal"/>
     <w:qFormat/>
     <w:pPr>
-      <w:spacing w:before="240" w:after="100"/>
+      <w:spacing w:before="240" w:after="80"/>
     </w:pPr>
     <w:rPr>
       <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/>
       <w:b/>
-      <w:sz w:val="30"/>
+      <w:sz w:val="26"/>
       <w:color w:val="0F172A"/>
     </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="ListBullet">
+    <w:name w:val="List Bullet"/>
+    <w:basedOn w:val="Normal"/>
+    <w:pPr>
+      <w:ind w:left="480" w:hanging="240"/>
+      <w:spacing w:after="60"/>
+    </w:pPr>
   </w:style>
 </w:styles>`
   );
 
-  const escapeXml = (unsafe: string) =>
-    unsafe
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&apos;');
-
   // 5. word/document.xml
-  let bodyXml = '';
-
-  for (const p of docParagraphs) {
-    if (p.text === '--- PAGE BREAK ---') {
-      bodyXml += `<w:p><w:r><w:br w:type="page"/></w:r></w:p>`;
-      continue;
-    }
-
-    if (p.isHeading) {
-      bodyXml += `<w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="28"/><w:color w:val="0F172A"/></w:rPr><w:t xml:space="preserve">${escapeXml(p.text)}</w:t></w:r></w:p>`;
-    } else if (p.isBullet) {
-      bodyXml += `<w:p><w:pPr><w:ind w:left="720" w:hanging="360"/><w:spacing w:after="80"/></w:pPr><w:r><w:rPr><w:sz w:val="22"/><w:color w:val="334155"/></w:rPr><w:t xml:space="preserve">${escapeXml(p.text)}</w:t></w:r></w:p>`;
-    } else {
-      bodyXml += `<w:p><w:pPr><w:spacing w:after="120" w:line="260" w:lineRule="auto"/></w:pPr><w:r><w:rPr><w:sz w:val="22"/><w:color w:val="334155"/></w:rPr><w:t xml:space="preserve">${escapeXml(p.text)}</w:t></w:r></w:p>`;
-    }
-  }
-
-  bodyXml += `<w:sectPr>
+  const bodyXml = `${documentXmlBlocks.join('\n')}
+  <w:sectPr>
     <w:pgSz w:w="11906" w:h="16838"/>
-    <w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="720" w:footer="720" w:gutter="0"/>
+    <w:pgMar w:top="1080" w:right="1080" w:bottom="1080" w:left="1080" w:header="720" w:footer="720" w:gutter="0"/>
   </w:sectPr>`;
 
   zip.folder('word')?.file(

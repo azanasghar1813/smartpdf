@@ -22,9 +22,9 @@ console.log('======================================================\n');
 let passed = 0;
 let failed = 0;
 
-function runTest(name, fn) {
+async function runTest(name, fn) {
   try {
-    fn();
+    await fn();
     console.log(`✅ ${name}`);
     passed++;
   } catch (err) {
@@ -34,8 +34,9 @@ function runTest(name, fn) {
   }
 }
 
-// ISSUE 1: Sitemap covers all 32 tools + 10 public pages + 4 blog posts = 46 URLs
-runTest('Issue 1: Sitemap.xml contains all 32 tools, public pages, and blog posts with https://simplepdf.me', () => {
+async function runAll() {
+// ISSUE 1: Sitemap covers all active tools + 10 public pages + 4 blog posts = 40 URLs (excludes coming-soon)
+await runTest('Issue 1: Sitemap.xml contains all active tools, public pages, and blog posts with https://simplepdf.me (excludes coming-soon)', () => {
   const sitemapPath = path.join(PUBLIC_DIR, 'sitemap.xml');
   assert.ok(fs.existsSync(sitemapPath), 'sitemap.xml is missing from public directory');
   const sitemap = fs.readFileSync(sitemapPath, 'utf-8');
@@ -44,11 +45,20 @@ runTest('Issue 1: Sitemap.xml contains all 32 tools, public pages, and blog post
   assert.ok(!sitemap.includes('https://simplepdf.com'), 'sitemap.xml still contains old domain simplepdf.com');
   assert.ok(sitemap.includes('https://simplepdf.me'), 'sitemap.xml missing https://simplepdf.me');
 
-  // Check all 32 tools
-  for (const tool of ALL_TOOLS) {
+  const activeTools = ALL_TOOLS.filter((t) => t.status !== 'coming-soon');
+  const comingSoonTools = ALL_TOOLS.filter((t) => t.status === 'coming-soon');
+
+  for (const tool of activeTools) {
     assert.ok(
       sitemap.includes(`<loc>https://simplepdf.me${tool.path}</loc>`),
-      `sitemap.xml missing tool: ${tool.path}`
+      `sitemap.xml missing active tool: ${tool.path}`
+    );
+  }
+
+  for (const tool of comingSoonTools) {
+    assert.ok(
+      !sitemap.includes(`<loc>https://simplepdf.me${tool.path}</loc>`),
+      `sitemap.xml must exclude coming-soon tool: ${tool.path}`
     );
   }
 
@@ -69,9 +79,10 @@ runTest('Issue 1: Sitemap.xml contains all 32 tools, public pages, and blog post
     );
   }
 
-  // Verify total loc count is exactly 46
+  // Verify total loc count matches activeTools + 10 public pages + 4 blog posts
+  const expectedLocCount = activeTools.length + expectedPages.length + BLOG_POSTS.length;
   const locCount = (sitemap.match(/<loc>/g) || []).length;
-  assert.strictEqual(locCount, 46, `Expected exactly 46 URLs in sitemap.xml, found ${locCount}`);
+  assert.strictEqual(locCount, expectedLocCount, `Expected ${expectedLocCount} URLs in sitemap.xml, found ${locCount}`);
 
   // Exclude private routes
   assert.ok(!sitemap.includes('/admin'), 'sitemap.xml must not contain /admin');
@@ -213,7 +224,89 @@ runTest('Issue 8: HTTPS redirect, www to non-www redirect, GA4, and Google Searc
   assert.strictEqual(SITE_CONFIG.url, 'https://simplepdf.me', 'SITE_CONFIG url is not https://simplepdf.me');
 });
 
+// ISSUE 9: Enterprise Security & Tool Honesty Verification (Phase 0 - 5 Punch List)
+await runTest('Issue 9: Zero fake success, admin auth gates, UUID uploads, and clean sitemaps', async () => {
+  // 1. ConversionService throws on unsupported tool instead of defaulting to repairPdf
+  const { ConversionService } = await import('../backend/src/services/conversionService.ts');
+  const conversionService = new ConversionService();
+  let threwUnsupported = false;
+  try {
+    await conversionService.processJob('non-existent-tool', Buffer.from('%PDF-1.4 mock'), 'test.pdf');
+  } catch (err) {
+    if (err.message.includes('Unsupported conversion tool')) {
+      threwUnsupported = true;
+    }
+  }
+  assert.strictEqual(threwUnsupported, true, 'conversionService must throw for unsupported tools');
+
+  // 2. Protected admin routes check in tools.routes.ts
+  const toolsRoutesContent = fs.readFileSync(path.join(ROOT_DIR, 'backend/src/routes/tools.routes.ts'), 'utf-8');
+  assert.ok(toolsRoutesContent.includes("requireAuth, requireAdmin, purgeEphemeralStorage"), '/admin/purge-storage must be protected with requireAuth and requireAdmin');
+  assert.ok(toolsRoutesContent.includes("crypto.randomUUID"), 'multer storage must use crypto.randomUUID for safe filenames');
+
+  // 3. AdminPage does not have 1-Click demo login or hardcoded admin password
+  const adminPageContent = fs.readFileSync(path.join(ROOT_DIR, 'frontend/src/pages/AdminPage.tsx'), 'utf-8');
+  assert.ok(!adminPageContent.includes('1-Click Demo Login'), 'AdminPage must not contain 1-Click Demo Login');
+  assert.ok(!adminPageContent.includes("adminPassword === 'admin123'"), 'AdminPage must not have hardcoded admin password check');
+
+  // 4. docker-compose.yml uses env variable for POSTGRES_PASSWORD
+  const dockerComposeContent = fs.readFileSync(path.join(ROOT_DIR, 'docker-compose.yml'), 'utf-8');
+  assert.ok(dockerComposeContent.includes('${POSTGRES_PASSWORD:-postgrespassword}'), 'docker-compose.yml must use POSTGRES_PASSWORD env variable');
+
+  // 5. Nginx has explicit SPA routes and try_files ends in =404
+  const nginxContent = fs.readFileSync(path.join(ROOT_DIR, 'nginx/nginx.conf'), 'utf-8');
+  assert.ok(nginxContent.includes('location ~ ^/(dashboard|admin|login|register|checkout)$'), 'nginx.conf must have explicit SPA routes with noindex');
+  assert.ok(nginxContent.includes('client_max_body_size 60M;'), 'nginx.conf must align upload limit with 50MB free tier');
+
+  // 6. Zero stale simplepdf.com URLs in public sitemaps
+  const publicFiles = fs.readdirSync(PUBLIC_DIR);
+  const staleSitemaps = publicFiles.filter((f) => f.startsWith('sitemap-'));
+  assert.strictEqual(staleSitemaps.length, 0, `Stale sitemap files found in public: ${staleSitemaps.join(', ')}`);
+
+  // 7. Coming-soon status on tools requiring external enterprise binaries
+  const { ALL_TOOLS: toolsList } = await import('../frontend/src/data/tools.ts');
+  const comingSoonTools = toolsList.filter((t) => t.status === 'coming-soon').map((t) => t.id);
+  assert.ok(comingSoonTools.includes('ocr-pdf'), 'ocr-pdf must be marked coming-soon until real Tesseract/ocrmypdf is connected');
+  assert.ok(comingSoonTools.includes('protect-pdf'), 'protect-pdf must be marked coming-soon until real AES-256 binary is connected');
+  assert.ok(comingSoonTools.includes('unlock-pdf'), 'unlock-pdf must be marked coming-soon until real decryption binary is connected');
+  assert.ok(comingSoonTools.includes('redact-pdf'), 'redact-pdf must be marked coming-soon until permanent rasterizing redaction is connected');
+  assert.ok(comingSoonTools.includes('pdf-to-pdfa'), 'pdf-to-pdfa must be marked coming-soon until ISO 19005 validator is connected');
+  assert.ok(comingSoonTools.includes('pdf-forms'), 'pdf-forms must be marked coming-soon');
+
+  // 8. Verify Rotate PDF rotates all pages
+  const { rotatePdfFile } = require('../frontend/src/services/clientPdfService.ts');
+  const { PDFDocument } = require('pdf-lib');
+  const testDoc = await PDFDocument.create();
+  testDoc.addPage([100, 100]);
+  testDoc.addPage([100, 100]);
+  testDoc.addPage([100, 100]);
+  const testBytes = await testDoc.save();
+  const testFile = new File([testBytes], 'test_rotate.pdf', { type: 'application/pdf' });
+  const rotatedBytes = await rotatePdfFile(testFile, 90);
+  const loadedRotated = await PDFDocument.load(rotatedBytes);
+  const rotatedPages = loadedRotated.getPages();
+  assert.strictEqual(rotatedPages.length, 3, 'Must retain all 3 pages');
+  assert.strictEqual(rotatedPages[0].getRotation().angle, 90, 'Page 0 must be rotated 90 deg');
+  assert.strictEqual(rotatedPages[1].getRotation().angle, 90, 'Page 1 must be rotated 90 deg');
+  assert.strictEqual(rotatedPages[2].getRotation().angle, 90, 'Page 2 must be rotated 90 deg');
+
+  // 9. Verify coming-soon tools have noindex in prerendered HTML and localized public pages exist
+  const ocrHtmlPath = path.join(DIST_DIR, 'ocr-pdf/index.html');
+  assert.ok(fs.existsSync(ocrHtmlPath), 'dist/ocr-pdf/index.html must exist');
+  const ocrHtml = fs.readFileSync(ocrHtmlPath, 'utf-8');
+  assert.ok(ocrHtml.includes('noindex, follow'), 'coming-soon tool ocr-pdf must have noindex, follow in prerendered HTML');
+
+  assert.ok(fs.existsSync(path.join(DIST_DIR, 'es/index.html')), 'Localized homepage dist/es/index.html must exist');
+  assert.ok(fs.existsSync(path.join(DIST_DIR, 'es/privacy/index.html')), 'Localized public page dist/es/privacy/index.html must exist');
+});
+
 console.log(`\nAudit Test Results: ${passed} Passed, ${failed} Failed.\n`);
 if (failed > 0) {
   process.exit(1);
 }
+}
+
+runAll().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

@@ -21,6 +21,7 @@ export interface ToolMeta {
   longDescription: string;
   path: string;
   icon: string;
+  status?: 'live' | 'coming-soon';
   badge?: 'Popular' | 'New' | 'Pro' | 'AI';
   isClientSide: boolean;
   acceptedFileTypes: string[];
@@ -60,6 +61,8 @@ export interface ProcessingResult {
   fileName: string;
   fileSize: number;
   originalTotalSize: number;
+  originalDownloadUrl?: string;
+  originalFileName?: string;
   savedPercentage?: number;
   pageCount?: number;
 }

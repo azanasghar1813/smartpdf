@@ -42,16 +42,9 @@ export class ApiService {
         return await res.json();
       }
     } catch (e) {
-      console.warn('[ApiService] Backend metrics unreachable, using edge estimates.');
+      console.warn('[ApiService] Backend metrics unreachable:', e);
     }
-    return {
-      totalProcessedJobs: 0,
-      activeJobsInQueue: 0,
-      edgeBandwidthSavedGB: 0,
-      ephemeralFilesPurgedToday: 0,
-      registeredUsersCount: 1,
-      successRate: '100%',
-    };
+    return null;
   }
 
   /**
@@ -199,21 +192,21 @@ export class ApiService {
   /**
    * User Auth API
    */
-  public static async loginUser(email: string) {
+  public static async loginUser(email: string, password?: string) {
     const res = await fetch(`${API_BASE}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, password }),
     });
     if (!res.ok) throw new Error('Login failed');
     return await res.json();
   }
 
-  public static async registerUser(name: string, email: string) {
+  public static async registerUser(name: string, email: string, password?: string) {
     const res = await fetch(`${API_BASE}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email }),
+      body: JSON.stringify({ name, email, password }),
     });
     if (!res.ok) throw new Error('Registration failed');
     return await res.json();

@@ -20,7 +20,7 @@ export async function createProcessingJob(req: Request, res: Response) {
       }
     }
 
-    const userEmail = (req.body.userEmail as string) || (req as any).user?.email || 'demo@simplepdf.com';
+    const userEmail = (req.body.userEmail as string) || (req as any).user?.email || 'demo@simplepdf.me';
     const tier = (req.body.tier as any) || (req as any).user?.tier || 'free';
     const idempotencyKey = (req.headers['idempotency-key'] as string) || (req.body.idempotencyKey as string);
 
@@ -36,11 +36,10 @@ export async function createProcessingJob(req: Request, res: Response) {
       inputBuffer = file.buffer;
       originalFileName = file.originalname;
     } else {
-      // Minimal valid fallback PDF document
-      inputBuffer = Buffer.from(
-        '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R>>endobj\nxref\n0 4\n0000000000 65535 f\n0000000010 00000 n\n0000000053 00000 n\n0000000102 00000 n\ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n178\n%%EOF'
-      );
-      originalFileName = 'sample.pdf';
+      return res.status(400).json({
+        error: 'No file uploaded.',
+        message: 'Please attach a valid document file to process.',
+      });
     }
 
     const result = await jobService.submitJob(

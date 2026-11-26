@@ -39,9 +39,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setLoading(true);
     setTimeout(() => {
       if (mode === 'login') {
-        login(email || 'demo@simplepdf.com', email.includes('admin') ? 'admin' : 'user');
+        login(email || 'demo@simplepdf.me');
       } else {
-        register(name || 'New User', email || 'demo@simplepdf.com');
+        register(name || 'New User', email || 'demo@simplepdf.me');
       }
       setLoading(false);
       onClose();
@@ -50,9 +50,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleQuickDemoLogin = (role: 'user' | 'admin') => {
     if (role === 'admin') {
-      login('admin@simplepdf.com', 'admin');
+      login('admin@simplepdf.me');
     } else {
-      login('demo@simplepdf.com', 'user');
+      login('demo@simplepdf.me');
     }
     onClose();
   };

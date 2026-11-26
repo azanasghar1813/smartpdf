@@ -110,9 +110,9 @@ export class JsonFileRepository implements IDatabaseRepository {
 
     const defaultData = {
       users: {
-        'admin@simplepdf.com': {
+        'admin@simplepdf.me': {
           id: 'usr_admin_root',
-          email: 'admin@simplepdf.com',
+          email: 'admin@simplepdf.me',
           name: 'System Admin',
           role: 'admin' as const,
           tier: 'premium' as const,

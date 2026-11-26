@@ -243,7 +243,7 @@ export const PDFEditorWorkspace: React.FC<{ toolName?: string }> = ({
               <h1 className="text-xl font-extrabold text-slate-900">{toolName}</h1>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Stamp electronic signatures, add text notes, and draw highlight boxes.
+              Stamp visual electronic signatures, add text annotations, and draw highlight boxes directly in your browser.
             </p>
           </div>
 
@@ -254,7 +254,7 @@ export const PDFEditorWorkspace: React.FC<{ toolName?: string }> = ({
                 className="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1.5 transition-colors"
               >
                 <PenTool className="w-3.5 h-3.5 text-brand-600" />
-                <span>{currentSignature ? 'Change Signature' : 'Create Signature'}</span>
+                <span>{currentSignature ? 'Change Visual Signature' : 'Create Visual Signature'}</span>
               </button>
 
               <button
@@ -317,7 +317,7 @@ export const PDFEditorWorkspace: React.FC<{ toolName?: string }> = ({
                   }`}
                 >
                   <PenTool className="w-3.5 h-3.5" />
-                  <span>Place Signature</span>
+                  <span>Place Visual Signature</span>
                 </button>
                 <button
                   onClick={() => setActiveTool('text')}

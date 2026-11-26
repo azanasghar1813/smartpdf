@@ -60,8 +60,8 @@ for (const p of mainPages) {
   sitemapXml += `  </url>\n`;
 }
 
-// Add All 32 PDF Tools (Default English) with full hreflang alternate clusters
-for (const tool of ALL_TOOLS) {
+// Add All Active PDF Tools (Default English) with full hreflang alternate clusters (excluding coming-soon/noindex tools)
+for (const tool of ALL_TOOLS.filter((t) => t.status !== 'coming-soon')) {
   sitemapXml += `  <url>\n`;
   sitemapXml += `    <loc>${SITE_URL}${tool.path}</loc>\n`;
   sitemapXml += `    <lastmod>${today}</lastmod>\n`;
@@ -87,14 +87,18 @@ for (const post of BLOG_POSTS) {
 
 sitemapXml += `</urlset>\n`;
 
-// 2B. Build Full Direct Multi-Country Sitemap (All 270 Localized URLs for fast deep crawlers)
+// 2B. Build Full Direct Multi-Country Sitemap (All Localized URLs for fast deep crawlers, dist-only)
 let sitemapAllXml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
 sitemapAllXml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
 
 for (const p of mainPages) {
   sitemapAllXml += `  <url><loc>${SITE_URL}${p.path}</loc><lastmod>${p.lastmod}</lastmod><priority>${p.priority}</priority></url>\n`;
+  for (const lang of publishedLangs.filter((l) => l.code !== DEFAULT_LANGUAGE)) {
+    const langPath = `/${lang.code}${p.path === '/' ? '' : p.path}`;
+    sitemapAllXml += `  <url><loc>${SITE_URL}${langPath}</loc><lastmod>${p.lastmod}</lastmod><priority>${p.priority}</priority></url>\n`;
+  }
 }
-for (const tool of ALL_TOOLS) {
+for (const tool of ALL_TOOLS.filter((t) => t.status !== 'coming-soon')) {
   sitemapAllXml += `  <url><loc>${SITE_URL}${tool.path}</loc><lastmod>${today}</lastmod><priority>0.9</priority></url>\n`;
   for (const lang of publishedLangs.filter((l) => l.code !== DEFAULT_LANGUAGE)) {
     sitemapAllXml += `  <url><loc>${SITE_URL}/${lang.code}${tool.path}</loc><lastmod>${today}</lastmod><priority>0.8</priority></url>\n`;
@@ -149,11 +153,14 @@ function writeToBoth(filename, content) {
 }
 
 writeToBoth('sitemap.xml', sitemapXml);
-writeToBoth('sitemap-all.xml', sitemapAllXml);
+if (fs.existsSync(DIST_DIR)) {
+  fs.writeFileSync(path.join(DIST_DIR, 'sitemap-all.xml'), sitemapAllXml, 'utf-8');
+}
 writeToBoth('robots.txt', robotsTxt);
 writeToBoth('rss.xml', rssXml);
 
-const totalEntries = mainPages.length + ALL_TOOLS.length * publishedLangs.length + BLOG_POSTS.length;
+const activeToolsCount = ALL_TOOLS.filter((t) => t.status !== 'coming-soon').length;
+const totalEntries = mainPages.length + activeToolsCount * publishedLangs.length + BLOG_POSTS.length;
 console.log(`✅ Generated sitemap.xml with ${totalEntries} indexed URLs with reciprocal hreflang.`);
 console.log(`✅ Generated robots.txt with bot prioritization for Google, Bing, and AI crawlers.`);
 console.log(`✅ Generated rss.xml for rapid RSS crawler discovery.`);

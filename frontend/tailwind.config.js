@@ -4,9 +4,14 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  darkMode: 'class',
   theme: {
     extend: {
+      borderWidth: {
+        3: '3px',
+      },
+      ringWidth: {
+        3: '3px',
+      },
       colors: {
         brand: {
           50: '#fff1f2',
@@ -34,6 +39,8 @@ export default {
         ],
       },
       boxShadow: {
+        '2xs': '0 1px 1px 0 rgba(0, 0, 0, 0.03)',
+        'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
         'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
         'soft-lg': '0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04)',
       },

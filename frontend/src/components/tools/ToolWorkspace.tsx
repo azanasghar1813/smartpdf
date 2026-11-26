@@ -38,6 +38,7 @@ import {
   Sparkles,
   ChevronRight,
   AlertCircle,
+  Clock,
   CheckCircle2,
   Lock,
   Unlock,
@@ -107,9 +108,21 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({ tool, onNavigate }
     const fileArray = Array.from(newFiles);
 
     for (const f of fileArray) {
+      // File extension & MIME validation
+      const ext = `.${(f.name.split('.').pop() || '').toLowerCase()}`;
+      const allowedExts = tool.acceptedFileTypes.map((t) => t.toLowerCase());
+      const isAllowedExt = allowedExts.includes(ext) || (ext === '.jpeg' && allowedExts.includes('.jpg'));
+      const isPdfMimeOk = ext !== '.pdf' || !f.type || f.type === 'application/pdf' || f.type === 'application/x-pdf';
+      if (!isAllowedExt || !isPdfMimeOk) {
+        setErrorMessage(`Unsupported file type "${f.name}". Allowed formats: ${tool.acceptedFileTypes.join(', ')}`);
+        setStatus('error');
+        return;
+      }
+
       const maxBytes = tool.maxFileSizeFreeMB * 1024 * 1024;
       if (f.size > maxBytes) {
         setErrorMessage(`File "${f.name}" exceeds the maximum free limit of ${tool.maxFileSizeFreeMB}MB.`);
+        setStatus('error');
         return;
       }
 
@@ -249,12 +262,9 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({ tool, onNavigate }
       // 4. Rotate PDF
       else if (tool.id === 'rotate-pdf') {
         setProgress(50);
-        setProgressMsg('Applying page orientation adjustments...');
-        const rotationMap: Record<number, number> = {};
-        files.forEach((f, idx) => {
-          if (f.rotation) rotationMap[idx] = f.rotation;
-        });
-        const bytes = await rotatePdfFile(files[0].file, rotationMap);
+        setProgressMsg('Applying page orientation adjustments across all pages...');
+        const rotAngle = files[0]?.rotation || 90;
+        const bytes = await rotatePdfFile(files[0].file, rotAngle);
         outputBlob = new Blob([bytes as any], { type: 'application/pdf' });
         outputName = `SimplePDF_rotated.pdf`;
       }
@@ -382,13 +392,7 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({ tool, onNavigate }
             );
           },
           async () => {
-            setProgress(70);
-            setProgressMsg('Cloud backend busy or unreachable. Activating in-browser client fallback...');
-            const buf = await files[0].file.arrayBuffer();
-            return {
-              blob: new Blob([buf], { type: 'application/pdf' }),
-              fileName: `SimplePDF_${tool.id}.pdf`,
-            };
+            throw new Error('Cloud conversion cluster is currently busy or unreachable. Please try again in a moment or verify file integrity.');
           }
         );
         outputBlob = executionResult.blob;
@@ -409,11 +413,22 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({ tool, onNavigate }
           ? Math.round(((originalTotalSize - newSize) / originalTotalSize) * 100)
           : undefined;
 
+      let originalDownloadUrl: string | undefined;
+      let originalFileName: string | undefined;
+      if (files.length > 0 && files[0].file) {
+        try {
+          originalDownloadUrl = URL.createObjectURL(files[0].file);
+          originalFileName = files[0].name || files[0].file.name;
+        } catch {}
+      }
+
       setResult({
         downloadUrl,
         fileName: outputName,
         fileSize: newSize,
         originalTotalSize,
+        originalDownloadUrl,
+        originalFileName: originalFileName || 'original-document.pdf',
         savedPercentage: savedPct,
       });
 
@@ -433,6 +448,9 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({ tool, onNavigate }
   const handleReset = () => {
     if (result?.downloadUrl) {
       URL.revokeObjectURL(result.downloadUrl);
+    }
+    if (result?.originalDownloadUrl) {
+      URL.revokeObjectURL(result.originalDownloadUrl);
     }
     setFiles([]);
     setResult(null);
@@ -455,24 +473,24 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({ tool, onNavigate }
     return false;
   }, [tool.id]);
 
-  if (isToolDisabled) {
+  if (isToolDisabled || tool.status === 'coming-soon') {
     return (
-      <div className="min-h-screen bg-slate-50 py-16 flex items-center justify-center px-4">
+      <div className="min-h-[60vh] bg-slate-50 py-16 flex items-center justify-center px-4">
         <div className="max-w-md w-full bg-white rounded-3xl p-8 border border-slate-200 shadow-soft text-center space-y-5">
           <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
-            <AlertCircle className="w-8 h-8" />
+            <Clock className="w-8 h-8" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-extrabold text-slate-900">{tool.name} is in Maintenance</h2>
+            <h2 className="text-xl font-extrabold text-slate-900">{tool.name} Engine Coming Soon</h2>
             <p className="text-xs text-slate-500 leading-relaxed">
-              This tool has been temporarily paused for routine maintenance by the platform administrator. Please explore our other 30+ tools.
+              We are currently upgrading this tool with verified compliance and enterprise security benchmarks. In the meantime, enjoy 100% free access to our 26 fully operational live tools.
             </p>
           </div>
           <button
             onClick={() => onNavigate('/')}
-            className="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs transition-all shadow-md shadow-brand-500/20"
+            className="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition-all hover:scale-[1.02]"
           >
-            Explore Other PDF Tools
+            Explore Live Tools
           </button>
         </div>
       </div>
@@ -532,11 +550,20 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({ tool, onNavigate }
           {/* STATE 1: EMPTY DROPZONE */}
           {files.length === 0 && status === 'idle' && (
             <div
+              role="button"
+              tabIndex={0}
+              aria-label={`Upload files for ${tool.name}`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`border-3 border-dashed rounded-2xl p-10 sm:p-14 text-center cursor-pointer transition-all flex flex-col items-center justify-center space-y-4 ${
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  fileInputRef.current?.click();
+                }
+              }}
+              className={`border-3 border-dashed rounded-2xl p-10 sm:p-14 text-center cursor-pointer transition-all flex flex-col items-center justify-center space-y-4 focus:outline-none focus-visible:ring-3 focus-visible:ring-brand-500/40 ${
                 isDragging
                   ? 'border-brand-500 bg-rose-50/60 scale-[1.01]'
                   : 'border-slate-300 hover:border-brand-400 hover:bg-slate-50/70'
@@ -926,42 +953,101 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({ tool, onNavigate }
                 </p>
               </div>
 
-              {/* File comparison badge */}
-              <div className="inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                <span className="font-semibold text-slate-600">
-                  File Size: <strong className="text-slate-900">{formatSize(result.fileSize)}</strong>
-                </span>
-                {tool.id === 'compress-pdf' && result.savedPercentage !== undefined && result.savedPercentage > 0 && (
-                  <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                    -{result.savedPercentage}% Smaller
-                  </span>
-                )}
+              {/* TWO CONVENIENT DOWNLOAD OPTIONS: CONVERTED/PROCESSED & ORIGINAL */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto pt-2 text-left">
+                {/* OPTION 1: CONVERTED / PROCESSED FILE */}
+                <div className="bg-brand-50/70 border-2 border-brand-500/40 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-sm hover:border-brand-500 transition-all">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-100 text-brand-800">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        {tool.id === 'compress-pdf' ? 'Compressed PDF' : 'Converted File'}
+                      </span>
+                      {tool.id === 'compress-pdf' && result.savedPercentage !== undefined && result.savedPercentage > 0 && (
+                        <span className="font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full text-xs border border-emerald-200">
+                          -{result.savedPercentage}% Smaller
+                        </span>
+                      )}
+                    </div>
+
+                    <h4 className="font-extrabold text-slate-900 text-sm truncate" title={result.fileName}>
+                      {result.fileName}
+                    </h4>
+
+                    <p className="text-xs text-slate-600 font-medium">
+                      Processed Size: <strong className="text-slate-900">{formatSize(result.fileSize)}</strong>
+                      {result.fileName.endsWith('.docx') && ' • Editable Word Document'}
+                    </p>
+                  </div>
+
+                  <a
+                    href={result.downloadUrl}
+                    download={result.fileName}
+                    className="w-full py-3.5 px-4 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-extrabold text-sm shadow-md shadow-brand-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>
+                      {result.fileName.endsWith('.docx')
+                        ? 'Download Word (.docx)'
+                        : result.fileName.endsWith('.xlsx')
+                        ? 'Download Excel (.xlsx)'
+                        : result.fileName.endsWith('.zip')
+                        ? 'Download All Images (ZIP)'
+                        : 'Download Processed File'}
+                    </span>
+                  </a>
+                </div>
+
+                {/* OPTION 2: ORIGINAL SOURCE DOCUMENT */}
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-sm hover:border-slate-300 transition-all">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-200 text-slate-700">
+                        <FileIcon className="w-3.5 h-3.5" />
+                        Original Document
+                      </span>
+                      <span className="text-[11px] font-semibold text-slate-500 bg-white px-2 py-0.5 rounded-full border border-slate-200">
+                        100% Quality
+                      </span>
+                    </div>
+
+                    <h4 className="font-extrabold text-slate-800 text-sm truncate" title={result.originalFileName || 'original-file'}>
+                      {result.originalFileName || 'Original Document'}
+                    </h4>
+
+                    <p className="text-xs text-slate-600 font-medium">
+                      Original Size: <strong className="text-slate-900">{formatSize(result.originalTotalSize)}</strong> • Source File
+                    </p>
+                  </div>
+
+                  {result.originalDownloadUrl ? (
+                    <a
+                      href={result.originalDownloadUrl}
+                      download={result.originalFileName || 'original-document.pdf'}
+                      className="w-full py-3.5 px-4 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-extrabold text-sm shadow-xs hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                    >
+                      <Download className="w-4 h-4 text-slate-500" />
+                      <span>Download Original</span>
+                    </a>
+                  ) : (
+                    <button
+                      disabled
+                      className="w-full py-3.5 px-4 rounded-xl bg-slate-100 text-slate-400 font-bold text-sm cursor-not-allowed"
+                    >
+                      Original Preserved
+                    </button>
+                  )}
+                </div>
               </div>
 
-              {/* Main Download Button */}
-              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-                <a
-                  href={result.downloadUrl}
-                  download={result.fileName}
-                  className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-extrabold text-base shadow-soft-lg shadow-brand-500/30 hover:scale-105 transition-all flex items-center justify-center gap-2"
-                >
-                  <Download className="w-5 h-5" />
-                  <span>
-                    {result.fileName.endsWith('.docx')
-                      ? 'Download Word Document (.docx)'
-                      : result.fileName.endsWith('.xlsx')
-                      ? 'Download Excel Spreadsheet (.xlsx)'
-                      : result.fileName.endsWith('.zip')
-                      ? 'Download All Images (ZIP)'
-                      : 'Download Processed Document'}
-                  </span>
-                </a>
-
+              {/* Action Buttons: Process Another File */}
+              <div className="pt-2 flex items-center justify-center">
                 <button
                   onClick={handleReset}
-                  className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition-colors"
+                  className="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors flex items-center gap-2"
                 >
-                  Process Another File
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Convert / Process Another File</span>
                 </button>
               </div>
 

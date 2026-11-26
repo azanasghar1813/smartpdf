@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ALL_LANGUAGES, getPublishedLanguages, isRTL } from '../../i18n/languages';
 import { parsePath, getEquivalentPath } from '../../utils/url';
-import { Globe, ChevronDown, Check } from 'lucide-react';
+import { ChevronDown, Check } from 'lucide-react';
+import { FlagIcon } from '../common/FlagIcon';
 
 interface LanguageSwitcherProps {
   currentPath: string;
@@ -73,10 +74,10 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         aria-label={`Select language. Current language is ${currentLangDef.nativeName}`}
         className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 shadow-2xs hover:border-brand-300 transition-all focus:outline-none focus:ring-2 focus:ring-brand-500/20"
       >
-        <Globe className="w-4 h-4 text-brand-600" />
-        <span className="font-semibold">{currentLangDef.nativeName}</span>
+        <FlagIcon countryCode={currentLangDef.countryCode} className="w-4 h-3 rounded-[2px] shadow-2xs" />
+        <span className="font-semibold text-slate-800">{currentLangDef.nativeName}</span>
         <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">
-          {currentLangDef.countryCode}
+          {currentLangDef.code.toUpperCase()}
         </span>
         <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
@@ -86,10 +87,11 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         <div
           role="listbox"
           tabIndex={-1}
-          className={`absolute ${align === 'right' ? 'right-0' : 'left-0'} mt-2 w-56 rounded-2xl bg-white shadow-soft-lg border border-slate-200 py-2 z-50 animate-in fade-in zoom-in-95 duration-150 focus:outline-none ${isCurrentRtl ? 'rtl' : 'ltr'}`}
+          className={`absolute ${align === 'right' ? 'right-0' : 'left-0'} mt-2 w-60 rounded-2xl bg-white shadow-soft-lg border border-slate-200 py-2 z-50 animate-in fade-in zoom-in-95 duration-150 focus:outline-none ${isCurrentRtl ? 'rtl' : 'ltr'}`}
         >
-          <div className="px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 mb-1">
-            Languages / زبانیں / اللغات
+          <div className="px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 mb-1 flex items-center justify-between">
+            <span>Languages</span>
+            <span className="text-[10px] text-slate-400 font-normal">زبانیں / اللغات</span>
           </div>
 
           <div className="max-h-72 overflow-y-auto space-y-0.5 px-1">
@@ -108,7 +110,8 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <span className="text-[11px] font-mono font-bold w-6 text-slate-400">
+                    <FlagIcon countryCode={lang.countryCode} className="w-5 h-3.5 rounded-[2px] shadow-2xs" />
+                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 uppercase border border-slate-200">
                       {lang.code.toUpperCase()}
                     </span>
                     <span className="text-slate-900 font-semibold">{lang.nativeName}</span>

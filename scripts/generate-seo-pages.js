@@ -295,13 +295,18 @@ function generateToolPageHtml(rawTool, langCode) {
   html = html.replace(/<html[^>]*>/i, `<html lang="${langCode}" dir="${rtl ? 'rtl' : 'ltr'}">`);
   html = html.replace(/<title>.*?<\/title>/i, `<title>${escapeHtml(title)}</title>`);
 
+  const isComingSoon = rawTool.status === 'coming-soon';
+  const robotsDirective = isComingSoon
+    ? 'noindex, follow'
+    : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+
   const headInjections = `
     <meta name="description" content="${escapeHtml(description)}" />
     <meta name="keywords" content="${escapeHtml(rawTool.seoKeywords ? rawTool.seoKeywords.join(', ') : '')}" />
     <link rel="canonical" href="${canonicalUrl}" />
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-    <meta name="bingbot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="robots" content="${robotsDirective}" />
+    <meta name="googlebot" content="${robotsDirective}" />
+    <meta name="bingbot" content="${robotsDirective}" />
 ${hreflangTags}
 ${xDefaultTag}
     <meta property="og:type" content="website" />
@@ -435,10 +440,21 @@ ${JSON.stringify([articleSchema, breadcrumbSchema], null, 2)}
 }
 
 // 3. FAQ Page Prerender Function
-function generateFaqPageHtml() {
-  const canonicalUrl = `${SITE_URL}/faq`;
+function generateFaqPageHtml(langCode = 'en') {
+  const isDefault = langCode === DEFAULT_LANGUAGE;
+  const localizedPath = isDefault ? '/faq' : `/${langCode}/faq`;
+  const canonicalUrl = `${SITE_URL}${localizedPath}`;
+  const rtl = isRTL(langCode);
   const title = `Frequently Asked Questions & Support | SimplePDF`;
   const description = `Find clear answers to questions about SimplePDF tools, privacy guarantees, in-browser WebAssembly security, file retention limits, and subscriptions.`;
+
+  const hreflangTags = publishedLangs
+    .map((l) => {
+      const altPath = l.code === DEFAULT_LANGUAGE ? '/faq' : `/${l.code}/faq`;
+      return `    <link rel="alternate" hreflang="${l.code}" href="${SITE_URL}${altPath}" />`;
+    })
+    .join('\n');
+  const xDefaultTag = `    <link rel="alternate" hreflang="x-default" href="${SITE_URL}/faq" />`;
 
   const faqSchema = {
     '@context': 'https://schema.org',
@@ -473,6 +489,7 @@ function generateFaqPageHtml() {
   </div>`;
 
   let html = cleanBaseTemplate(baseTemplate);
+  html = html.replace(/<html[^>]*>/i, `<html lang="${langCode}" dir="${rtl ? 'rtl' : 'ltr'}">`);
   html = html.replace(/<title>.*?<\/title>/i, `<title>${escapeHtml(title)}</title>`);
 
   const headInjections = `
@@ -482,6 +499,8 @@ function generateFaqPageHtml() {
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="bingbot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+${hreflangTags}
+${xDefaultTag}
     <meta property="og:type" content="website" />
     <meta property="og:url" content="${canonicalUrl}" />
     <meta property="og:title" content="${escapeHtml(title)}" />
@@ -533,8 +552,19 @@ function generateNotFoundHtml() {
 }
 
 // 5. Standard Public Static Page Helper
-function generatePublicPageHtml({ pagePath, title, description, breadcrumbName, bodyHtml }) {
-  const canonicalUrl = `${SITE_URL}${pagePath}`;
+function generatePublicPageHtml({ pagePath, title, description, breadcrumbName, bodyHtml, langCode = 'en' }) {
+  const isDefault = langCode === DEFAULT_LANGUAGE;
+  const localizedPath = isDefault ? pagePath : `/${langCode}${pagePath}`;
+  const canonicalUrl = `${SITE_URL}${localizedPath}`;
+  const rtl = isRTL(langCode);
+
+  const hreflangTags = publishedLangs
+    .map((l) => {
+      const altPath = l.code === DEFAULT_LANGUAGE ? pagePath : `/${l.code}${pagePath}`;
+      return `    <link rel="alternate" hreflang="${l.code}" href="${SITE_URL}${altPath}" />`;
+    })
+    .join('\n');
+  const xDefaultTag = `    <link rel="alternate" hreflang="x-default" href="${SITE_URL}${pagePath}" />`;
 
   const webPageSchema = {
     '@context': 'https://schema.org',
@@ -542,19 +572,20 @@ function generatePublicPageHtml({ pagePath, title, description, breadcrumbName, 
     name: title,
     url: canonicalUrl,
     description: description,
-    inLanguage: 'en',
+    inLanguage: langCode,
   };
 
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}${isDefault ? '/' : `/${langCode}`}` },
       { '@type': 'ListItem', position: 2, name: breadcrumbName, item: canonicalUrl },
     ],
   };
 
   let html = cleanBaseTemplate(baseTemplate);
+  html = html.replace(/<html[^>]*>/i, `<html lang="${langCode}" dir="${rtl ? 'rtl' : 'ltr'}">`);
   html = html.replace(/<title>.*?<\/title>/i, `<title>${escapeHtml(title)}</title>`);
 
   const headInjections = `
@@ -564,6 +595,8 @@ function generatePublicPageHtml({ pagePath, title, description, breadcrumbName, 
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="bingbot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+${hreflangTags}
+${xDefaultTag}
     <meta property="og:type" content="website" />
     <meta property="og:url" content="${canonicalUrl}" />
     <meta property="og:title" content="${escapeHtml(title)}" />
@@ -586,7 +619,7 @@ ${JSON.stringify([webPageSchema, breadcrumbSchema], null, 2)}
 }
 
 // 6. Privacy Policy Prerender HTML
-function generatePrivacyPageHtml() {
+function generatePrivacyPageHtml(langCode = 'en') {
   const bodyHtml = `
   <div class="py-16 bg-slate-50 min-h-screen" data-prerendered="true">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
@@ -658,11 +691,12 @@ function generatePrivacyPageHtml() {
     description: 'Learn how SimplePDF protects your documents with client-side WebAssembly, zero file retention, automatic shredding, and full GDPR/CCPA compliance.',
     breadcrumbName: 'Privacy Policy',
     bodyHtml,
+    langCode,
   });
 }
 
 // 7. Terms of Service Prerender HTML
-function generateTermsPageHtml() {
+function generateTermsPageHtml(langCode = 'en') {
   const bodyHtml = `
   <div class="py-16 bg-slate-50 min-h-screen" data-prerendered="true">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
@@ -733,11 +767,12 @@ function generateTermsPageHtml() {
     description: 'Read the SimplePDF Terms of Service. 100% free online PDF suite, zero document licensing, full user copyright ownership, and acceptable use terms.',
     breadcrumbName: 'Terms of Service',
     bodyHtml,
+    langCode,
   });
 }
 
 // 8. Cookie Policy Prerender HTML
-function generateCookiesPageHtml() {
+function generateCookiesPageHtml(langCode = 'en') {
   const bodyHtml = `
   <div class="py-16 bg-slate-50 min-h-screen" data-prerendered="true">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
@@ -816,11 +851,12 @@ function generateCookiesPageHtml() {
     description: 'Discover how SimplePDF uses minimal cookies and local storage for interface preferences and AdSense ads. Learn how to manage or disable cookies.',
     breadcrumbName: 'Cookie Policy',
     bodyHtml,
+    langCode,
   });
 }
 
 // 9. Pricing Page Prerender HTML
-function generatePricingPageHtml() {
+function generatePricingPageHtml(langCode = 'en') {
   const bodyHtml = `
   <div class="py-16 bg-slate-50 min-h-screen" data-prerendered="true">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
@@ -874,11 +910,12 @@ function generatePricingPageHtml() {
     description: 'SimplePDF is 100% free with no credit card required. Explore 32+ fast in-browser and cloud PDF tools with zero file retention and instant processing.',
     breadcrumbName: 'Pricing',
     bodyHtml,
+    langCode,
   });
 }
 
 // 10. Security Architecture Prerender HTML
-function generateSecurityPageHtml() {
+function generateSecurityPageHtml(langCode = 'en') {
   const bodyHtml = `
   <div class="py-16 bg-slate-50 min-h-screen" data-prerendered="true">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
@@ -917,11 +954,12 @@ function generateSecurityPageHtml() {
     description: 'Explore the SimplePDF security architecture: client-side WebAssembly edge processing, TLS 1.3 encryption, and automated cryptographic shredding.',
     breadcrumbName: 'Security',
     bodyHtml,
+    langCode,
   });
 }
 
 // 11. About Us Prerender HTML
-function generateAboutPageHtml() {
+function generateAboutPageHtml(langCode = 'en') {
   const bodyHtml = `
   <div class="py-16 bg-slate-50 min-h-screen" data-prerendered="true">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
@@ -958,11 +996,12 @@ function generateAboutPageHtml() {
     description: 'Discover the story behind SimplePDF: fast, elegant, and uncompromisingly private document productivity tools powered by WebAssembly.',
     breadcrumbName: 'About Us',
     bodyHtml,
+    langCode,
   });
 }
 
 // 12. Contact Us Prerender HTML
-function generateContactPageHtml() {
+function generateContactPageHtml(langCode = 'en') {
   const bodyHtml = `
   <div class="py-16 bg-slate-50 min-h-screen" data-prerendered="true">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
@@ -995,11 +1034,12 @@ function generateContactPageHtml() {
     description: 'Get in touch with the SimplePDF team for customer support, bug reports, feature requests, or enterprise partnership inquiries.',
     breadcrumbName: 'Contact Us',
     bodyHtml,
+    langCode,
   });
 }
 
 // 13. Blog Index Prerender HTML
-function generateBlogIndexHtml() {
+function generateBlogIndexHtml(langCode = 'en') {
   const bodyHtml = `
   <div class="py-16 bg-slate-50 min-h-screen" data-prerendered="true">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
@@ -1040,7 +1080,97 @@ function generateBlogIndexHtml() {
     description: 'Explore in-depth tutorials, workflow guides, and productivity tips for PDF editing, compression, OCR, and document privacy.',
     breadcrumbName: 'Blog',
     bodyHtml,
+    langCode,
   });
+}
+
+// 14. Localized Home Page Prerender HTML
+function generateHomePageHtml(langCode = 'en') {
+  const isDefault = langCode === DEFAULT_LANGUAGE;
+  const rtl = isRTL(langCode);
+  const localizedPath = isDefault ? '/' : `/${langCode}`;
+  const canonicalUrl = `${SITE_URL}${localizedPath}`;
+  const title = `SimplePDF — 100% Free Online PDF Tools | Merge, Compress, Edit & Convert`;
+  const description = `Every PDF tool you need, 100% free and easy to use. Merge, split, compress, convert, rotate, and edit PDF files in seconds with in-browser privacy.`;
+
+  const hreflangTags = publishedLangs
+    .map((l) => {
+      const altPath = l.code === DEFAULT_LANGUAGE ? '/' : `/${l.code}`;
+      return `    <link rel="alternate" hreflang="${l.code}" href="${SITE_URL}${altPath}" />`;
+    })
+    .join('\n');
+  const xDefaultTag = `    <link rel="alternate" hreflang="x-default" href="${SITE_URL}/" />`;
+
+  const webSiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'SimplePDF',
+    url: SITE_URL,
+    description: description,
+    inLanguage: langCode,
+  };
+
+  const organizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'SimplePDF',
+    url: SITE_URL,
+    logo: `${SITE_URL}/logo.svg`,
+  };
+
+  const preRenderedBody = `
+  <div class="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 ${rtl ? 'rtl' : 'ltr'}" data-prerendered="true">
+    <div class="max-w-6xl mx-auto space-y-12">
+      <header class="text-center space-y-4 max-w-3xl mx-auto">
+        <h1 class="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight">Every PDF Tool You Need, 100% Free</h1>
+        <p class="text-base sm:text-lg text-slate-600 leading-relaxed">${escapeHtml(description)}</p>
+      </header>
+      <section aria-label="PDF Tools" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        ${ALL_TOOLS.filter((tool) => tool.status !== 'coming-soon').map((tool) => {
+          const locTool = getLocalizedTool(tool, langCode);
+          const toolHref = isDefault ? tool.path : `/${langCode}${tool.path}`;
+          return `
+          <a href="${toolHref}" class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-brand-500 hover:shadow-soft transition-all block">
+            <h2 class="font-bold text-base text-slate-900">${escapeHtml(locTool.name)}</h2>
+            <p class="text-xs text-slate-500 mt-1 line-clamp-2">${escapeHtml(locTool.description)}</p>
+          </a>`;
+        }).join('')}
+      </section>
+    </div>
+  </div>`;
+
+  let html = cleanBaseTemplate(baseTemplate);
+  html = html.replace(/<html[^>]*>/i, `<html lang="${langCode}" dir="${rtl ? 'rtl' : 'ltr'}">`);
+  html = html.replace(/<title>.*?<\/title>/i, `<title>${escapeHtml(title)}</title>`);
+
+  const headInjections = `
+    <meta name="description" content="${escapeHtml(description)}" />
+    <meta name="keywords" content="simplepdf, free online pdf tools, merge pdf, compress pdf, convert pdf, edit pdf, split pdf" />
+    <link rel="canonical" href="${canonicalUrl}" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="bingbot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+${hreflangTags}
+${xDefaultTag}
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="${canonicalUrl}" />
+    <meta property="og:title" content="${escapeHtml(title)}" />
+    <meta property="og:description" content="${escapeHtml(description)}" />
+    <meta property="og:image" content="${SITE_URL}/og-cover.png" />
+    <meta property="og:site_name" content="SimplePDF" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="${canonicalUrl}" />
+    <meta name="twitter:title" content="${escapeHtml(title)}" />
+    <meta name="twitter:description" content="${escapeHtml(description)}" />
+    <meta name="twitter:image" content="${SITE_URL}/og-cover.png" />
+    <script type="application/ld+json" id="seo-json-ld">
+${JSON.stringify([webSiteSchema, organizationSchema], null, 2)}
+    </script>
+  </head>`;
+
+  html = html.replace(/<\/head>/i, headInjections);
+  html = html.replace(/<div id="root"[^>]*>([\s\S]*?)<\/div>/i, `<div id="root">${preRenderedBody}</div>`);
+  return html;
 }
 
 // A. Generate All Tool Pages (32 tools × 8 languages = 256 files)
@@ -1072,19 +1202,22 @@ for (const post of BLOG_POSTS) {
   totalGenerated++;
 }
 
-// C. Generate /faq Page
-const faqDir = path.join(DIST_DIR, 'faq');
-if (!fs.existsSync(faqDir)) {
-  fs.mkdirSync(faqDir, { recursive: true });
+// C. Generate /faq Pages (all languages)
+for (const lang of publishedLangs) {
+  const isDefault = lang.code === DEFAULT_LANGUAGE;
+  const faqDir = isDefault ? path.join(DIST_DIR, 'faq') : path.join(DIST_DIR, lang.code, 'faq');
+  if (!fs.existsSync(faqDir)) {
+    fs.mkdirSync(faqDir, { recursive: true });
+  }
+  fs.writeFileSync(path.join(faqDir, 'index.html'), generateFaqPageHtml(lang.code), 'utf-8');
+  totalGenerated++;
 }
-fs.writeFileSync(path.join(faqDir, 'index.html'), generateFaqPageHtml(), 'utf-8');
-totalGenerated++;
 
 // D. Generate 404.html
 fs.writeFileSync(path.join(DIST_DIR, '404.html'), generateNotFoundHtml(), 'utf-8');
 totalGenerated++;
 
-// E. Generate Static Public & Legal Pages (/privacy, /terms, /cookies, /pricing, /about, /contact, /security, /blog)
+// E. Generate Static Public & Legal Pages (/privacy, /terms, /cookies, /pricing, /about, /contact, /security, /blog) across all languages
 const publicPages = [
   { dir: 'privacy', generator: generatePrivacyPageHtml },
   { dir: 'terms', generator: generateTermsPageHtml },
@@ -1097,11 +1230,25 @@ const publicPages = [
 ];
 
 for (const { dir, generator } of publicPages) {
-  const targetDir = path.join(DIST_DIR, dir);
+  for (const lang of publishedLangs) {
+    const isDefault = lang.code === DEFAULT_LANGUAGE;
+    const targetDir = isDefault ? path.join(DIST_DIR, dir) : path.join(DIST_DIR, lang.code, dir);
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+    fs.writeFileSync(path.join(targetDir, 'index.html'), generator(lang.code), 'utf-8');
+    totalGenerated++;
+  }
+}
+
+// E2. Generate Localized Home Pages (/es/index.html, /ar/index.html, etc.)
+for (const lang of publishedLangs) {
+  if (lang.code === DEFAULT_LANGUAGE) continue;
+  const targetDir = path.join(DIST_DIR, lang.code);
   if (!fs.existsSync(targetDir)) {
     fs.mkdirSync(targetDir, { recursive: true });
   }
-  fs.writeFileSync(path.join(targetDir, 'index.html'), generator(), 'utf-8');
+  fs.writeFileSync(path.join(targetDir, 'index.html'), generateHomePageHtml(lang.code), 'utf-8');
   totalGenerated++;
 }
 
